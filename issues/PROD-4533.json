@@ -1,0 +1,12 @@
+{
+  "id": "PROD-4533",
+  "title": "Database connection timeouts spiking in reporting service",
+  "status": "open",
+  "severity": null,
+  "labels": ["customer-impact", "data"],
+  "assignee": null,
+  "opened_at": "2026-06-05T08:47:22Z",
+  "reporter": "monitoring-alerts@bts-synthetic.example",
+  "body": "Automated alerting triggered at 08:44 UTC. The reporting-service is throwing intermittent connection timeouts on reads from the analytics-db replica. Error rate on GET /reports/* has climbed to 18% over the last 12 minutes. Affected endpoints: /reports/daily, /reports/export, /reports/dashboard. Stack trace from sampled requests:\n\njava.sql.SQLTimeoutException: Timeout waiting for connection from pool\n  at com.bts.reporting.ReportingService.fetchReportData(ReportingService.java:89)\n  at com.bts.reporting.ReportController.getReport(ReportController.java:44)\n\nReplica lag is currently 47 seconds (normal is <2s). Primary appears healthy. No deploys in the last 6 hours. Three enterprise customers (Initech, Globex Corp, Umbrella Ltd) have already raised support tickets.",
+  "comments": []
+}
