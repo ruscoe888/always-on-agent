@@ -465,7 +465,8 @@
     <div style="margin-top:28px;max-width:580px">
       <p class="body-text">
         Every hour your team spends manually triaging incidents, chasing deploy correlations,
-        and auditing vendor contracts is an hour not spent on engineering that matters.
+        and auditing vendor contracts is an hour not spent on the work that actually matters.
+        We built the agent that handles all of it — and it's already running.
       </p>
     </div>
     <div style="margin-top:48px;display:flex;align-items:center;gap:20px">
@@ -480,27 +481,27 @@
   </div>
 
   <!-- ═══════════════════════════════════════
-       SLIDE 2 — THE SITUATION
+       SLIDE 2 — THE PROBLEM
   ════════════════════════════════════════ -->
-  <div class="slide" data-title="Situation">
-    <div class="eyebrow">The Situation</div>
+  <div class="slide" data-title="The Problem">
+    <div class="eyebrow">The Problem — Manual Ops Is Breaking Your Team</div>
     <div class="headline h2">Sound familiar?</div>
 
     <ul class="problem-list" style="margin-top:28px">
       <li>
         <span class="icon">🔔</span>
-        <div><strong style="color:var(--text);font-weight:700">Incidents land in a queue.</strong>
-        Your team reads each one, searches for a matching runbook, and manually decides severity. This takes 20-40 minutes per incident — during which your customers are waiting.</div>
+        <div><strong style="color:var(--text);font-weight:700">Incidents land in a queue — and sit there.</strong>
+        Someone reads each one, hunts for a runbook, and manually decides severity. That takes 20–40 minutes per incident. Your customers are waiting the whole time.</div>
       </li>
       <li>
         <span class="icon">🔗</span>
         <div><strong style="color:var(--text);font-weight:700">Deploy correlations are guesswork.</strong>
-        "Did a recent release cause this?" requires a human to cross-reference incident timestamps against deploy logs. The answer is usually obvious in hindsight — and late.</div>
+        "Did a recent release cause this?" requires a human to cross-reference incident timestamps against deploy logs. The answer is usually obvious in hindsight — and always late.</div>
       </li>
       <li>
         <span class="icon">📄</span>
-        <div><strong style="color:var(--text);font-weight:700">Compliance drift goes unnoticed.</strong>
-        Vendor contracts are signed and filed. No one has time to re-audit them against your policy each quarter. Violations accumulate silently until an incident forces a review.</div>
+        <div><strong style="color:var(--text);font-weight:700">Compliance drift goes unnoticed until it's a crisis.</strong>
+        Vendor contracts are signed and filed. No one audits them against your policy each quarter. Violations accumulate silently — until a breach forces a panicked review.</div>
       </li>
       <li>
         <span class="icon">🌙</span>
@@ -514,18 +515,18 @@
        SLIDE 3 — THE ANSWER (PYRAMID APEX)
   ════════════════════════════════════════ -->
   <div class="slide slide-answer" data-title="The Answer">
-    <div class="eyebrow">The Answer — Lead With The Conclusion</div>
+    <div class="eyebrow">The Answer — Pyramid Apex</div>
     <div class="headline h2">An agent that never sleeps,<br>never misses, never forgets</div>
 
     <div class="answer-box">
       We built an always-on ops agent that automatically triages every incident, correlates it
       with recent deployments, audits your vendor contracts, and files actionable GitHub Issues —
-      every four hours, with zero human intervention required.
+      every four hours, with zero human intervention and zero permission prompts required.
     </div>
 
     <div class="stat-row">
       <div class="stat-pill">
-        <div class="val">18</div>
+        <div class="val">20+</div>
         <div class="lbl">Issues filed<br>automatically</div>
       </div>
       <div class="stat-pill" style="border-color:rgba(255,23,68,0.3)">
@@ -534,7 +535,7 @@
       </div>
       <div class="stat-pill" style="border-color:rgba(41,182,246,0.3)">
         <div class="val" style="color:#29B6F6">4h</div>
-        <div class="lbl">Max time to detect<br>a new incident</div>
+        <div class="lbl">Max detection<br>time today</div>
       </div>
       <div class="stat-pill" style="border-color:rgba(186,104,200,0.3)">
         <div class="val" style="color:#BA68C8">9</div>
@@ -545,6 +546,7 @@
     <p class="body-text" style="margin-top:8px">
       It runs whether you are in a meeting, asleep, or on holiday. New data in the repo triggers
       a full re-analysis on the next cycle. Findings that are already filed are skipped — no noise, no duplicates.
+      A live dashboard shows everything in real time.
     </p>
   </div>
 
@@ -552,32 +554,32 @@
        SLIDE 4 — HOW IT WORKS
   ════════════════════════════════════════ -->
   <div class="slide" data-title="How It Works">
-    <div class="eyebrow">Supporting Argument 1 — Architecture</div>
-    <div class="headline h2">Two layers. One agent.</div>
+    <div class="eyebrow">Supporting Argument 1 — How It Works</div>
+    <div class="headline h2">Set it once. It runs forever.</div>
 
     <div class="flow" style="margin-top:28px">
       <div class="flow-step">
         <div class="step-icon">⏰</div>
         <div class="step-label">Cron Fires</div>
-        <div class="step-desc">Every 4 hours. Durable — survives restarts. No infrastructure needed.</div>
+        <div class="step-desc">Every 4 hours. Durable — survives restarts. No servers or infrastructure needed.</div>
       </div>
       <div class="flow-arrow">→</div>
       <div class="flow-step">
         <div class="step-icon">📥</div>
-        <div class="step-label">Git Pull</div>
-        <div class="step-desc">Fetches the latest issues, deploys, and contracts from the repo.</div>
+        <div class="step-label">Reads Repo</div>
+        <div class="step-desc">Fetches the latest incidents, deploy logs, and vendor contracts from GitHub.</div>
       </div>
       <div class="flow-arrow">→</div>
       <div class="flow-step">
         <div class="step-icon">🧠</div>
-        <div class="step-label">CLAUDE.md</div>
-        <div class="step-desc">The agent's brain. All rules, logic, and output formats — versioned in git.</div>
+        <div class="step-label">Runs Playbook</div>
+        <div class="step-desc">CLAUDE.md is the agent's brain — all rules and logic versioned in git, owned by you.</div>
       </div>
       <div class="flow-arrow">→</div>
       <div class="flow-step">
         <div class="step-icon">🔍</div>
         <div class="step-label">Dedup Check</div>
-        <div class="step-desc">Reads existing GitHub Issues. Skips anything already reported.</div>
+        <div class="step-desc">Reads existing GitHub Issues. Skips anything already reported — zero noise.</div>
       </div>
       <div class="flow-arrow">→</div>
       <div class="flow-step">
@@ -592,13 +594,13 @@
         <div class="card-num">1</div>
         <div class="card-label">Task One</div>
         <h3>Ops Triage</h3>
-        <p>Assigns P0–P3 severity, matches runbooks, recommends on-call team and specific fix steps.</p>
+        <p>Assigns P0–P3 severity to every incident, matches runbooks automatically, and names the exact on-call team and fix steps.</p>
       </div>
       <div class="card" style="--accent:var(--correlation)">
         <div class="card-num">2</div>
         <div class="card-label">Task Two</div>
         <h3>Incident Correlation</h3>
-        <p>Cross-references incidents with deployments within 48 hours. Identifies causal chains and recommends rollbacks.</p>
+        <p>Cross-references every incident against deployments in the 48-hour window. Finds causal chains and recommends rollbacks.</p>
       </div>
       <div class="card" style="--accent:var(--compliance)">
         <div class="card-num">3</div>
@@ -612,39 +614,42 @@
   <!-- ═══════════════════════════════════════
        SLIDE 5 — PROOF: WHAT IT FOUND
   ════════════════════════════════════════ -->
-  <div class="slide" data-title="Proof">
-    <div class="eyebrow">Supporting Argument 2 — Evidence From a Real Run</div>
-    <div class="headline h2">What it found in the first run</div>
+  <div class="slide" data-title="What It Found">
+    <div class="eyebrow">Supporting Argument 2 — Real Evidence From the First Run</div>
+    <div class="headline h2">20+ issues filed. Zero humans involved.</div>
 
     <div class="cols cols-2" style="margin-top:28px;max-width:1100px;gap:20px">
       <div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">INCIDENTS TRIAGED</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">INCIDENTS TRIAGED &amp; CORRELATED</div>
         <div class="timeline">
           <div class="tl-item">
             <div class="tl-time">PROD-4521</div>
             <div class="tl-line"><div class="tl-dot" style="background:var(--p0);box-shadow:0 0 8px rgba(255,23,68,0.6)"></div><div class="tl-connector"></div></div>
-            <div class="tl-content"><strong>P0 — PaymentService NPE</strong><span>Correlated to payment-service v4.8.2 deployed 14 min prior. Rollback recommended.</span></div>
+            <div class="tl-content"><strong>P0 — PaymentService NPE</strong><span>Correlated to payment-service v4.8.2 deployed 14 min prior. Rollback recommended automatically.</span></div>
           </div>
           <div class="tl-item">
             <div class="tl-time">PROD-4487</div>
-            <div class="tl-line"><div class="tl-dot" style="background:var(--p1);box-shadow:0 0 8px rgba(255,107,53,0.6)"></div><div class="tl-connector"></div></div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--triage);box-shadow:0 0 8px rgba(255,107,53,0.6)"></div><div class="tl-connector"></div></div>
             <div class="tl-content"><strong>P1 — Acme Corp Checkout Broken</strong><span>Causal chain found: feature flag + NPE bug. 2,400 users affected.</span></div>
           </div>
           <div class="tl-item">
             <div class="tl-time">PROD-4519</div>
-            <div class="tl-line"><div class="tl-dot" style="background:var(--p0);box-shadow:0 0 8px rgba(255,227,0,0.4)"></div><div class="tl-connector"></div></div>
-            <div class="tl-content"><strong>P2 — Slow Image Uploads</strong><span>Signing-service URL TTL reduced from 3600s to 300s. Rollback available.</span></div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--correlation);box-shadow:0 0 8px rgba(41,182,246,0.4)"></div><div class="tl-connector"></div></div>
+            <div class="tl-content"><strong>P2 — Slow Image Uploads</strong><span>Signing-service TTL reduced from 3600s to 300s in latest deploy. Rollback available.</span></div>
           </div>
           <div class="tl-item">
             <div class="tl-time">PROD-4533</div>
-            <div class="tl-line"><div class="tl-dot" style="background:var(--p1)"></div><div class="tl-connector" style="display:none"></div></div>
-            <div class="tl-content"><strong>P1 — Reporting DB Timeouts</strong><span>New issue added to repo mid-session. Auto-detected on next cycle. Zero prompts.</span></div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--triage)"></div><div class="tl-connector" style="display:none"></div></div>
+            <div class="tl-content"><strong>P1 — Reporting DB Timeouts</strong><span>Added mid-session. Auto-detected on next cycle. Zero human involvement. Zero prompts.</span></div>
           </div>
+        </div>
+        <div style="margin-top:10px;padding:10px 14px;background:#0c0c0c;border:1px solid rgba(255,227,0,0.1);border-radius:2px;font-size:0.78rem;color:var(--muted)">
+          A fabricator runs every 20 min to continuously prove the system — no waiting for real incidents
         </div>
       </div>
 
       <div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">COMPLIANCE VIOLATIONS DETECTED</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">9 COMPLIANCE VIOLATIONS DETECTED — AUTOMATICALLY</div>
         <div style="display:flex;flex-direction:column;gap:8px">
 
           <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF1744">
@@ -653,18 +658,18 @@
           </div>
           <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF6B35">
             <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">HIGH</div>
-            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — 5-year lock-in, no termination for convenience. 365-day notice.</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — 5-year lock-in, no termination for convenience. 365-day notice required.</div>
           </div>
           <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF6B35">
             <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">HIGH</div>
-            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — Liability cap 3 months (policy requires 12). Includes data breach.</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — Liability cap 3 months (policy requires 12). Covers data breach.</div>
           </div>
           <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF1744">
             <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">CRITICAL</div>
             <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Acme Data Platform — Breach notification 96h (policy requires 72h).</div>
           </div>
           <div style="padding:10px 16px;background:#0c0c0c;border:1px solid rgba(255,227,0,0.06);border-radius:2px;font-size:0.8rem;color:var(--muted)">
-            +5 further violations across both contracts →
+            +5 further violations across both contracts — all flagged, all in GitHub Issues
           </div>
         </div>
       </div>
@@ -672,75 +677,69 @@
   </div>
 
   <!-- ═══════════════════════════════════════
-       SLIDE 6 — LIVE DASHBOARD
+       SLIDE 6 — WHAT'S COMING (PLAN 2)
   ════════════════════════════════════════ -->
-  <div class="slide" data-title="Dashboard">
-    <div class="eyebrow">Supporting Argument 3 — Visibility</div>
-    <div class="headline h2">Command-centre visibility<br>for your entire team</div>
+  <div class="slide" data-title="What's Coming">
+    <div class="eyebrow">Supporting Argument 3 — What's Coming Next</div>
+    <div class="headline h2">Plan 2: from 4 hours<br>to under 60 seconds</div>
 
-    <div class="cols cols-2" style="margin-top:28px;gap:28px;align-items:center;max-width:1100px">
+    <div class="cols cols-2" style="margin-top:28px;gap:36px;align-items:start;max-width:1100px">
       <div>
         <p class="body-text" style="margin-bottom:20px">
-          Every finding the agent creates is surfaced in a live operations dashboard.
-          No login required. No separate tool to learn.
+          Today's agent polls every 4 hours. Plan 2 replaces the cron with a GitHub Actions trigger —
+          the moment a push or pull request lands, six specialist agents wake up simultaneously
+          and triage it in under 60 seconds.
         </p>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
-            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
-            <span><strong style="color:var(--text)">Real-time stats</strong> — open issues, P0s, new today, compliance violations at a glance</span>
-          </li>
-          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
-            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
-            <span><strong style="color:var(--text)">Five drilldown charts</strong> — by type, by day, by week, by month. Click any segment to see the individual issues</span>
-          </li>
-          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
-            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
-            <span><strong style="color:var(--text)">Zero infrastructure</strong> — a single HTML file that reads live from the GitHub API. Share the URL, done</span>
-          </li>
-          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
-            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
-            <span><strong style="color:var(--text)">Automatic updates</strong> — every agent run adds new data. The dashboard reflects it on next refresh</span>
-          </li>
-        </ul>
-      </div>
 
-      <!-- Stylised dashboard preview -->
-      <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:4px;padding:20px;font-family:'Share Tech Mono',monospace">
-        <div style="font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:10px">WAYNE ENTERPRISES — COMMAND CENTER</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-          <div style="background:#111;border:1px solid var(--border);border-left:3px solid var(--yellow);padding:10px 12px">
-            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">OPEN ISSUES</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--yellow)">20</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          <div style="display:flex;gap:16px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:2.2rem;color:var(--yellow);line-height:1;min-width:56px;text-align:center">&lt;60s</div>
+            <div style="font-size:0.88rem;color:#aaa">Triage latency on push event — down from up to 4 hours today</div>
           </div>
-          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #FF1744;padding:10px 12px">
-            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">P0 CRITICAL</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#FF1744">1</div>
+          <div style="display:flex;gap:16px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:2.2rem;color:var(--yellow);line-height:1;min-width:56px;text-align:center">6</div>
+            <div style="font-size:0.88rem;color:#aaa">Specialist agents working in parallel — each owns one job</div>
           </div>
-          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #29B6F6;padding:10px 12px">
-            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">NEW TODAY</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#29B6F6">20</div>
-          </div>
-          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #BA68C8;padding:10px 12px">
-            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">COMPLIANCE</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#BA68C8">9</div>
+          <div style="display:flex;gap:16px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:2.2rem;color:var(--triage);line-height:1;min-width:56px;text-align:center">0</div>
+            <div style="font-size:0.88rem;color:#aaa">Additional infrastructure cost — runs entirely within GitHub</div>
           </div>
         </div>
-        <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">BREAKDOWN BY TYPE — CLICK TO DRILL DOWN</div>
-        <div style="display:flex;flex-direction:column;gap:5px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="font-size:0.6rem;color:var(--triage);width:70px">TRIAGE</div>
-            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:36%;background:var(--triage);opacity:0.7"></div></div>
-            <div style="font-size:0.6rem;color:var(--muted)">5</div>
+
+        <div style="padding:14px 18px;border:1px solid rgba(255,227,0,0.2);background:rgba(255,227,0,0.02);border-radius:2px;font-size:0.85rem;color:#aaa">
+          The live dashboard — 6 charts including a rolling 60-minute activity view,
+          auto-refreshing every 30 seconds with click-to-drilldown — already shows this data today.
+          Plan 2 just makes the data arrive faster.
+        </div>
+      </div>
+
+      <!-- 6-agent visual -->
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:12px">PLAN 2 — 6 SPECIALIST AGENTS</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--yellow)">Watcher</span>
+            <span style="color:var(--muted);margin-left:10px">Listens for push / PR events. Wakes the fleet.</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="font-size:0.6rem;color:var(--correlation);width:70px">CORRELAT.</div>
-            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:28%;background:var(--correlation);opacity:0.7"></div></div>
-            <div style="font-size:0.6rem;color:var(--muted)">4</div>
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid var(--triage);border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--triage)">Triage</span>
+            <span style="color:var(--muted);margin-left:10px">Assigns P0–P3, matches runbooks, pages on-call.</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="font-size:0.6rem;color:var(--compliance);width:70px">COMPLIAN.</div>
-            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:64%;background:var(--compliance);opacity:0.7"></div></div>
-            <div style="font-size:0.6rem;color:var(--muted)">9</div>
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid var(--correlation);border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--correlation)">Correlation</span>
+            <span style="color:var(--muted);margin-left:10px">Cross-references deploys in 48h window. Finds causal chains.</span>
+          </div>
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid var(--compliance);border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--compliance)">Compliance</span>
+            <span style="color:var(--muted);margin-left:10px">Audits contracts against 7-rule policy on every run.</span>
+          </div>
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid #888;border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:#aaa">Fabricator</span>
+            <span style="color:var(--muted);margin-left:10px">Generates realistic incidents every 20 min. Keeps dashboard live.</span>
+          </div>
+          <div style="padding:11px 14px;background:#0c0c0c;border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:2px;font-size:0.82rem">
+            <span style="font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--yellow)">Keeper</span>
+            <span style="color:var(--muted);margin-left:10px">Deduplicates, maintains state, writes the run summary.</span>
           </div>
         </div>
       </div>
@@ -751,49 +750,49 @@
        SLIDE 7 — NEXT STEPS / CTA
   ════════════════════════════════════════ -->
   <div class="slide" data-title="Next Steps">
-    <div class="eyebrow">Recommendation</div>
-    <div class="headline h2">What we do next, together</div>
+    <div class="eyebrow">Recommendation — What We Do Together</div>
+    <div class="headline h2">Your team. Your data.<br>Running this week.</div>
 
     <div class="cols cols-2" style="margin-top:28px;gap:36px;max-width:1100px;align-items:start">
       <div>
         <div class="cta-box">
           <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">IMMEDIATE ACTIONS — THIS WEEK</div>
           <ul class="next-steps">
-            <li><span class="step-badge">Step 1</span>Fork this pattern into your own repo — point the agent at your real incident data</li>
-            <li><span class="step-badge">Step 2</span>Extend CLAUDE.md with your runbooks, your severity definitions, your compliance policy</li>
-            <li><span class="step-badge">Step 3</span>Add your Slack or PagerDuty webhook so P0s page on-call immediately</li>
-            <li><span class="step-badge">Step 4</span>Schedule the 7-day cron renewal — or promote to a persistent GitHub Action for full autonomy</li>
+            <li><span class="step-badge">Step 1</span>Point the agent at your real incident repo — the playbook is already written in CLAUDE.md</li>
+            <li><span class="step-badge">Step 2</span>Extend CLAUDE.md with your runbooks, severity definitions, and compliance policy rules</li>
+            <li><span class="step-badge">Step 3</span>Add your Slack or PagerDuty webhook so P0s page on-call in seconds, not hours</li>
+            <li><span class="step-badge">Step 4</span>Promote to Plan 2 — GitHub Actions trigger replaces cron, latency drops below 60 seconds</li>
           </ul>
         </div>
       </div>
 
       <div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">WHAT YOU WALK AWAY WITH TODAY</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">WHAT EXISTS RIGHT NOW — ALREADY WORKING</div>
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
             <span style="font-size:1.2rem">✅</span>
-            <span>A working always-on agent in your GitHub repo — <strong style="color:var(--yellow)">running right now</strong></span>
+            <span>Always-on agent firing every 4h — <strong style="color:var(--yellow)">running right now, zero prompts</strong></span>
           </div>
           <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
             <span style="font-size:1.2rem">✅</span>
-            <span>20 auto-filed GitHub Issues — triage, correlation, and compliance findings</span>
+            <span>20+ auto-filed GitHub Issues — triage, correlation, and 9 compliance violations</span>
           </div>
           <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
             <span style="font-size:1.2rem">✅</span>
-            <span>A live ops dashboard requiring no infrastructure or backend</span>
+            <span>Live dashboard — 6 charts, 30-second auto-refresh, click-to-drilldown, no backend</span>
           </div>
           <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
             <span style="font-size:1.2rem">✅</span>
-            <span>A versioned, extensible CLAUDE.md you own and can evolve</span>
+            <span>Incident fabricator feeding the dashboard every 20 minutes — proves continuous operation</span>
           </div>
           <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
             <span style="font-size:1.2rem">✅</span>
-            <span>Zero ongoing infrastructure cost — runs inside Claude Code</span>
+            <span>Plan 2 designed — 6 agents, GitHub Actions trigger, sub-60s latency ready to build</span>
           </div>
         </div>
 
         <div style="margin-top:24px;padding:16px 20px;border:1px solid rgba(255,227,0,0.25);background:rgba(255,227,0,0.03);border-radius:2px;font-size:0.88rem;color:#aaa">
-          <strong style="color:var(--yellow)">The agent paid for itself</strong> before this presentation ended. It found 9 compliance violations your legal team hasn't seen yet — including a vendor with no termination clause for 5 years.
+          <strong style="color:var(--yellow)">The agent paid for itself</strong> before this presentation ended. It found 9 compliance violations your legal team has not seen yet — including a vendor with no termination clause for 5 years.
         </div>
       </div>
     </div>

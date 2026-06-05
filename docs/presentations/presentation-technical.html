@@ -154,10 +154,10 @@
       </div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#777;line-height:2">
         ruscoe888/always-on-agent<br>
-        Claude Code durable cron (CronCreate)<br>
-        Every 4h at :17 — off-peak to reduce fleet contention<br>
-        GitHub Issues via gh CLI<br>
-        .claude/scheduled_tasks.json — 7-day TTL, must renew
+        Claude Code durable crons (CronCreate)<br>
+        ops-agent: every 4h at :17 · fabricator: every 20 min<br>
+        GitHub Issues via gh CLI · 20+ issues filed · 5 labels<br>
+        .claude/scheduled_tasks.json — 7-day TTL per cron, both must renew
       </div>
     </div>
   </div>
@@ -165,44 +165,49 @@
   <!-- SLIDE 2: ARCHITECTURE -->
   <div class="slide" data-title="Architecture">
     <div class="eyebrow">Architecture</div>
-    <div class="headline h2">Two-layer design: cron prompt + CLAUDE.md</div>
+    <div class="headline h2">Two-cron design: ops-agent + fabricator, both backed by CLAUDE.md</div>
 
     <div style="margin-top:20px;max-width:960px">
-      <p class="body-text" style="margin-bottom:20px">The key decision was to keep the cron prompt minimal (~150 words) and push all domain logic into <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">CLAUDE.md</code>. Claude Code reads CLAUDE.md automatically when it enters the repo directory — so the agent inherits the full protocol without the cron prompt growing unbounded.</p>
+      <p class="body-text" style="margin-bottom:20px">Two durable crons are live. The <strong style="color:var(--green)">ops-agent</strong> cron fires every 4h at :17 — it does triage, correlation, and compliance. The <strong style="color:var(--green)">fabricator</strong> cron fires every 20 minutes — it runs <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">scripts/fabricate-issue.py</code> to synthesise realistic PROD-XXXX JSON files so the ops-agent always has fresh data to process. Both crons keep their prompts minimal and delegate all domain logic to <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">CLAUDE.md</code>.</p>
 
       <div class="arch" style="max-width:900px">
         <div class="arch-row">
-          <div class="arch-box" style="--accent:var(--yellow);border-color:rgba(255,227,0,0.2)">
-            <div class="ab-label" style="color:var(--yellow)">CronCreate (durable)</div>
-            <div class="ab-desc">~150-word prompt. Fires every 4h. Tells Claude to cd into the repo, git pull, and follow CLAUDE.md. Nothing else. Lives in .claude/scheduled_tasks.json.</div>
+          <div class="arch-box" style="--accent:var(--yellow);border-color:rgba(255,227,0,0.2);flex:1">
+            <div class="ab-label" style="color:var(--yellow)">ops-agent cron (every 4h :17)</div>
+            <div class="ab-desc">~150-word prompt. Tells Claude to git pull and run the full ops protocol from CLAUDE.md — triage, correlation, compliance, dedup, summary.</div>
+          </div>
+          <div class="arch-arrow" style="width:28px;color:rgba(255,227,0,0.3)">|</div>
+          <div class="arch-box" style="--accent:var(--compliance);border-color:rgba(186,104,200,0.2);flex:1">
+            <div class="ab-label" style="color:var(--compliance)">fabricator cron (every 20 min)</div>
+            <div class="ab-desc">Invokes scripts/fabricate-issue.py. Picks one of 6 templates, auto-increments PROD-ID with a random 1–8 gap, commits and pushes. Dev-only — supplies test data for the ops-agent.</div>
           </div>
         </div>
-        <div style="text-align:center;color:rgba(0,230,118,0.3);font-size:1rem;margin:4px 0">↓ triggers</div>
+        <div style="text-align:center;color:rgba(0,230,118,0.3);font-size:1rem;margin:4px 0">↓ ops-agent flow</div>
         <div class="arch-row">
           <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
             <div class="ab-label">git -C /repo pull origin main</div>
-            <div class="ab-desc">Fetches latest data. The repo is the single source of truth — issues, deploys, runbooks, contracts all live here.</div>
+            <div class="ab-desc">Fetches latest data including fabricator-generated issues. Repo is single source of truth.</div>
           </div>
           <div class="arch-arrow">→</div>
           <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
             <div class="ab-label">CLAUDE.md loaded</div>
-            <div class="ab-desc">Auto-loaded by Claude Code. Contains: severity rubric, runbook matching keywords, deploy correlation logic, compliance rule set, dedup query, output format.</div>
+            <div class="ab-desc">Auto-loaded by Claude Code. Contains: severity rubric, runbook keywords, correlation logic, compliance rules, dedup query, output format.</div>
           </div>
           <div class="arch-arrow">→</div>
           <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
             <div class="ab-label">gh issue list (dedup)</div>
-            <div class="ab-desc">Queries existing ops-agent issues before creating. Matches by PROD-XXXX ID (triage/correlation) or contract+rule string (compliance). Skips dupes.</div>
+            <div class="ab-desc">Queries existing ops-agent issues before creating. Matches by PROD-XXXX ID or contract+rule string. Skips dupes.</div>
           </div>
           <div class="arch-arrow">→</div>
           <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
             <div class="ab-label">gh issue create (×N)</div>
-            <div class="ab-desc">One issue per net-new finding. Labels: ops-agent + task-specific. Structured body with source file references.</div>
+            <div class="ab-desc">One issue per net-new finding. Labels: ops-agent + task-specific. Structured body with source file refs.</div>
           </div>
         </div>
       </div>
 
       <div style="margin-top:16px;padding:14px 18px;background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.12);border-radius:2px;font-size:0.82rem;color:#777">
-        <strong style="color:var(--green)">Why not a single monolithic prompt?</strong> — Cron prompts are string literals. A 2000-word prompt is fragile, unversioned, and can't be reviewed in a PR. CLAUDE.md is versioned in git, diffable, and Claude reads it natively. Changing agent behaviour = commit to CLAUDE.md = reviewed change.
+        <strong style="color:var(--green)">Why not a single monolithic prompt?</strong> — Cron prompts are string literals. A 2000-word prompt is fragile, unversioned, and can't be reviewed in a PR. CLAUDE.md is versioned in git, diffable, and Claude reads it natively. Changing agent behaviour = commit to CLAUDE.md = reviewed change. Docs live in docs/ (HLD.html, LLD.html, plan-2-architecture.md, agent-roster.md, Plan.md).
       </div>
     </div>
   </div>
@@ -210,7 +215,7 @@
   <!-- SLIDE 3: PERMISSIONS MODEL -->
   <div class="slide" data-title="Permissions">
     <div class="eyebrow">Permissions Model</div>
-    <div class="headline h2">Why the agent ran without prompting</div>
+    <div class="headline h2">Why the agent ran without prompting — 11 allowlisted commands</div>
 
     <div class="cols cols-code" style="margin-top:20px;max-width:1100px;gap:28px">
       <div>
@@ -219,15 +224,19 @@
         <div class="tradeoff" style="margin-bottom:16px">
           <div class="tradeoff-item pro">
             <div class="tl">GLOBAL</div>
-            <div class="td"><strong style="color:var(--text)">~/.claude/settings.json</strong> — allows git pull, gh issue *, gh label *, gh api, cat, ls, find, echo. Applies to all Claude Code sessions on this machine including cron runs.</div>
+            <div class="td"><strong style="color:var(--text)">~/.claude/settings.json</strong> — 11 commands: git pull, git -C * pull, gh issue list/create, gh label list/create, gh api, cat, ls, find, echo. Applies to all Claude Code sessions including both crons.</div>
           </div>
           <div class="tradeoff-item pro">
             <div class="tl">PROJECT</div>
             <div class="td"><strong style="color:var(--text)">.claude/settings.json</strong> (committed to repo) — mirrors the same allowlist. Provides a fallback and documents what the agent needs if run on a different machine.</div>
           </div>
           <div class="tradeoff-item con">
+            <div class="tl">NOTE</div>
+            <div class="td">The fabricator cron invokes <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">scripts/fabricate-issue.py</code> via <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">python3</code> — but python3 is called directly in the cron prompt, not via the Bash tool. The allowlist therefore does not need a <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">Bash(python3 *)</code> entry.</div>
+          </div>
+          <div class="tradeoff-item con">
             <div class="tl">GAP</div>
-            <div class="td">The Read tool is not Bash — it doesn't need allowlisting. But any <em>novel</em> Bash pattern not in the allowlist will still prompt. If you add new shell commands to CLAUDE.md, add them to the allowlist first.</div>
+            <div class="td">Any <em>novel</em> Bash pattern not in the allowlist will still prompt and hang the cron. If you add new shell commands to CLAUDE.md, add them to the allowlist first.</div>
           </div>
         </div>
 
@@ -237,8 +246,8 @@
       </div>
 
       <div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">~/.claude/settings.json</div>
-        <pre><span class="cmt">// Global — applies to all sessions, including cron</span>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">~/.claude/settings.json — 11 commands</div>
+        <pre><span class="cmt">// Global — applies to all sessions, including both crons</span>
 {
   <span class="str">"permissions"</span>: {
     <span class="str">"allow"</span>: [
@@ -253,7 +262,7 @@
       <span class="str">"Bash(ls *)"</span>,
       <span class="str">"Bash(find *)"</span>,
       <span class="str">"Bash(echo *)"</span>
-    ]
+    ]                    <span class="cmt">// 11 total</span>
   }
 }</pre>
 
@@ -306,7 +315,7 @@
         </div>
 
         <div style="padding:12px 16px;background:rgba(255,227,0,0.03);border:1px solid rgba(255,227,0,0.12);border-radius:2px;font-size:0.8rem;color:#777">
-          <strong style="color:var(--yellow)">Extending the agent:</strong> Add a new runbook? Update the keyword table in Section 1. New compliance rule? Append to compliance-policy.md and add the check to Section 3. New output channel (Slack, PagerDuty)? Add a new section to CLAUDE.md with the relevant Bash commands — then allowlist them.
+          <strong style="color:var(--yellow)">Extending the agent:</strong> Add a new runbook? Update the keyword table in Section 1. New compliance rule? Append to compliance-policy.md and add the check to Section 3. New output channel (Slack, PagerDuty)? Add a new section to CLAUDE.md with the relevant Bash commands — then allowlist them. <strong style="color:var(--yellow)">Plan 2 note:</strong> the <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">agents/</code> directory will house per-agent CLAUDE.md files for the six specialised Plan 2 agents (Watcher, Triage, Correlation, Compliance, Fabricator, Keeper).
         </div>
       </div>
 
@@ -367,7 +376,7 @@ with same type tag → SKIP.</pre>
   <span class="str">"comments"</span>: []
 }</pre>
         <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.6">
-          Critical field: <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">opened_at</code> — used for the 48h correlation window. Must be ISO 8601. Missing or malformed timestamps will silently break correlation.
+          Critical field: <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">opened_at</code> — used for the 48h correlation window. Must be ISO 8601. Missing or malformed timestamps will silently break correlation. The <code style="font-family:'Share Tech Mono',monospace;color:var(--compliance)">agent-fabricated</code> label is applied by the fabricator to all synthetic issues so the ops-agent can distinguish them if needed.
         </div>
       </div>
 
@@ -387,7 +396,7 @@ with same type tag → SKIP.</pre>
   }]
 }</pre>
         <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.6">
-          This is manually maintained today. The natural next step is a CI/CD pipeline that appends to this file on every deploy — making correlation fully automated end-to-end.
+          Still manually maintained. The natural next step is a CI/CD pipeline that appends to this file on every deploy. Until then, correlation quality depends on a human remembering to update it after each release.
         </div>
       </div>
 
@@ -469,10 +478,17 @@ Mature data protection jurisdiction.</pre>
           </tr>
           <tr>
             <td>Deploy data</td>
-            <td>Manual JSON file</td>
+            <td>Manual JSON file (deploys/recent.json)</td>
             <td>Live CI/CD API query</td>
             <td>No auth tokens needed in the agent. Simple to demo.</td>
-            <td>Stale if deploys aren't manually appended. Not production-ready as-is.</td>
+            <td>Stale if deploys aren't manually appended after each release. Not production-ready as-is.</td>
+          </tr>
+          <tr>
+            <td>Issue fabrication</td>
+            <td>Python script cron (fabricate-issue.py, every 20 min)</td>
+            <td>Manual test data entry</td>
+            <td>Hands-free — always-fresh PROD-XXXX files for the ops-agent to process. 6 templates covering realistic failure modes.</td>
+            <td>Fabricated issues enter the triage pipeline; ops-agent will open GitHub Issues for synthetic problems unless explicitly filtered.</td>
           </tr>
         </tbody>
       </table>
@@ -491,8 +507,8 @@ Mature data protection jurisdiction.</pre>
           <div class="q-item">
             <div class="q-num">1</div>
             <div>
-              <strong>7-day cron TTL</strong>
-              <span>The durable cron auto-expires. Currently requires manual re-creation. Fix: promote to a GitHub Action on a schedule, or add a self-renewal cron that recreates itself before expiry.</span>
+              <strong>7-day cron TTL — both crons</strong>
+              <span>Both the ops-agent cron (4h :17) and the fabricator cron (20 min) auto-expire after 7 days. Currently requires manual re-creation of each. Fix: promote to GitHub Actions on a schedule, or add a self-renewal cron that recreates both before expiry.</span>
             </div>
           </div>
           <div class="q-item">
@@ -514,6 +530,13 @@ Mature data protection jurisdiction.</pre>
             <div>
               <strong>No P0 escalation path</strong>
               <span>Agent files a GitHub Issue for a P0. That's it. A P0 needs a Slack or PagerDuty call. Add a Bash command to CLAUDE.md + an allowlist entry for curl to a webhook.</span>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num">5</div>
+            <div>
+              <strong>Dashboard GitHub API rate limit</strong>
+              <span>Dashboard polls GitHub API unauthenticated — capped at 120 req/h. With two active crons both triggering refreshes, this headroom is thin. Fix: add an auth token to the dashboard fetch calls to raise the limit to 5000 req/h.</span>
             </div>
           </div>
         </div>
@@ -572,7 +595,7 @@ Mature data protection jurisdiction.</pre>
         <div class="q-num">2</div>
         <div>
           <strong>Where should the cron live long-term?</strong>
-          <span>Currently tied to one machine running Claude Code. For production reliability, should this be a GitHub Actions workflow, a Lambda, or a managed Claude API scheduled invocation? Each has different auth and cost profiles.</span>
+          <span>Currently tied to one machine running Claude Code. Plan 2 answers this concretely: GitHub Actions replaces Claude Code cron for production reliability and event-driven triggers (Watcher agent fires on push, &lt;60s latency). Secrets move to ANTHROPIC_API_KEY (GitHub Secret) and FABRICATION_ENABLED (GitHub Variable). Each auth/cost profile is documented in plan-2-architecture.md.</span>
         </div>
       </div>
       <div class="q-item">
@@ -594,6 +617,13 @@ Mature data protection jurisdiction.</pre>
         <div>
           <strong>What's the rollback story?</strong>
           <span>If the agent files 50 incorrect issues due to a bad CLAUDE.md change, there's no bulk-close command. Should we add a cleanup script to the repo? Or is closing via gh issue list --label ops-agent sufficient?</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">6</div>
+        <div>
+          <strong>Should fabricated issues be excluded from agent triage?</strong>
+          <span>Currently the ops-agent will triage agent-fabricated issues as if they were real — opening GitHub Issues for synthetic 503s, DB lag, TLS expiry etc. The agent-fabricated label exists but the ops-agent CLAUDE.md does not filter it. Should triage skip issues carrying that label, or is processing them a useful end-to-end smoke test?</span>
         </div>
       </div>
     </div>
