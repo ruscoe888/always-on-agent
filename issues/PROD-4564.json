@@ -1,0 +1,16 @@
+{
+  "id": "PROD-4564",
+  "title": "Elevated 401 errors on API \u2014 suspected credential rotation issue",
+  "status": "open",
+  "severity": null,
+  "labels": [
+    "security",
+    "api",
+    "customer-impact"
+  ],
+  "assignee": null,
+  "opened_at": "2026-06-05T15:45:59Z",
+  "reporter": "monitoring-alerts@bts-synthetic.example",
+  "body": "Authentication error spike at 15:45 UTC. API 401 Unauthorized responses have increased 474% above baseline over the last 9 minutes. Error breakdown: 100% from customers in the EU-West region. Pattern suggests a subset of API keys or service account tokens have been invalidated. The timing correlates with a scheduled credential rotation that ran at 23:30 UTC. Affected customers (Vandelay Industries, Massive Dynamic, Soylent Corp) are reporting that their integrations have stopped working. The rotation script may have invalidated active tokens before issuing replacements, or the token propagation to the auth-service cache has not yet completed.",
+  "comments": []
+}
