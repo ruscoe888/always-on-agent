@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wayne Enterprises — Ops Command Center</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFE300;
+      --yellow-glow: 0 0 24px rgba(255,227,0,0.35);
+      --yellow-dim: rgba(255,227,0,0.12);
+      --bg: #080808;
+      --card: #101010;
+      --card-hover: #161616;
+      --border: rgba(255,227,0,0.18);
+      --text: #d8d8d8;
+      --muted: #555;
+      --triage: #FF6B35;
+      --correlation: #29B6F6;
+      --compliance: #BA68C8;
+      --p0: #FF1744;
+      --p1: #FF6B35;
+      --p2: #FFE300;
+      --p3: #29B6F6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      position: relative;
+      text-align: center;
+      padding: 36px 24px 28px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,227,0,0.06) 0%, transparent 100%);
+      overflow: hidden;
+    }
+
+    /* subtle Gotham skyline silhouette */
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background:
+        linear-gradient(var(--bg) 0%, transparent 100%),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px, transparent 30px,
+          rgba(255,227,0,0.04) 30px, rgba(255,227,0,0.04) 32px
+        );
+      pointer-events: none;
+    }
+
+    .bat-logo {
+      display: block;
+      margin: 0 auto 14px;
+      width: 110px;
+      height: 55px;
+      filter: drop-shadow(0 0 12px rgba(255,227,0,0.6));
+    }
+
+    .header h1 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      letter-spacing: 10px;
+      color: var(--yellow);
+      text-shadow: var(--yellow-glow);
+      line-height: 1;
+    }
+
+    .header .subtitle {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header .sync-badge {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    .sync-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 0 0 6px var(--yellow);
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 18px 20px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .2s, border-color .2s, background .2s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent, var(--yellow));
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent, var(--yellow));
+      box-shadow: var(--yellow-glow);
+      background: var(--card-hover);
+    }
+
+    .stat-card .label {
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 3.2rem;
+      line-height: 1;
+      color: var(--accent, var(--yellow));
+    }
+
+    .stat-card .sublabel {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1rem;
+      letter-spacing: 5px;
+      color: var(--yellow);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── CHART CARDS ── */
+    .charts-main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .charts-three {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+
+    .chart-card:hover {
+      border-color: rgba(255,227,0,0.45);
+      box-shadow: var(--yellow-glow);
+      background: var(--card-hover);
+    }
+
+    .chart-card .card-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      color: var(--yellow);
+      margin-bottom: 18px;
+    }
+
+    .chart-card .drill-hint {
+      position: absolute;
+      top: 18px; right: 16px;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .chart-card canvas { max-height: 280px; }
+
+    /* ── LOADING / ERROR ── */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 44px; height: 44px;
+      border: 2px solid var(--border);
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 3px;
+    }
+
+    .error-msg {
+      text-align: center;
+      padding: 80px 20px;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--p0);
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-height: 72vh;
+      background: #0c0c0c;
+      border-top: 2px solid var(--yellow);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-radius: 4px 4px 0 0;
+      overflow-y: auto;
+      animation: slideUp .25s cubic-bezier(.22,.61,.36,1);
+    }
+
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .modal-head {
+      position: sticky;
+      top: 0;
+      background: #0c0c0c;
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1;
+    }
+
+    .modal-head h2 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.3rem;
+      letter-spacing: 4px;
+      color: var(--yellow);
+    }
+
+    .modal-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 12px;
+    }
+
+    .modal-close {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: border-color .15s, color .15s;
+    }
+    .modal-close:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    .modal-body { padding: 16px 24px 32px; }
+
+    /* ── ISSUE LIST ── */
+    .issue-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .issue-row {
+      display: grid;
+      grid-template-columns: 48px 1fr auto auto;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: #080808;
+      border: 1px solid rgba(255,227,0,0.08);
+      border-radius: 2px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .issue-row:hover {
+      border-color: rgba(255,227,0,0.4);
+      background: rgba(255,227,0,0.02);
+    }
+
+    .issue-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .issue-text { font-size: 0.88rem; font-weight: 600; }
+    .issue-text .prod { color: var(--yellow); margin-right: 6px; }
+
+    .badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .badge-P0 { color: var(--p0); border: 1px solid var(--p0); background: rgba(255,23,68,.12); }
+    .badge-P1 { color: var(--p1); border: 1px solid var(--p1); background: rgba(255,107,53,.12); }
+    .badge-P2 { color: var(--p2); border: 1px solid var(--p2); background: rgba(255,227,0,.12); }
+    .badge-P3 { color: var(--p3); border: 1px solid var(--p3); background: rgba(41,182,246,.12); }
+    .badge-Triage     { color: var(--triage);      border: 1px solid var(--triage);      background: rgba(255,107,53,.12); }
+    .badge-Correlation{ color: var(--correlation); border: 1px solid var(--correlation); background: rgba(41,182,246,.12); }
+    .badge-Compliance { color: var(--compliance);  border: 1px solid var(--compliance);  background: rgba(186,104,200,.12); }
+
+    .issue-date {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .charts-main { grid-template-columns: 1fr; }
+      .charts-three { grid-template-columns: 1fr; }
+      .header .sync-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <!-- Batman Bat Logo SVG -->
+  <svg class="bat-logo" viewBox="0 0 440 200" fill="#FFE300" xmlns="http://www.w3.org/2000/svg">
+    <path d="
+      M220,170
+      C205,155 195,135 192,115
+      C175,128 150,132 128,122
+      C106,112 94,92 96,70
+      C78,80 55,78 38,64
+      C20,50 16,26 30,12
+      C14,8 4,16 2,32
+      C0,48 10,64 26,70
+      C14,80 10,96 18,108
+      C26,120 42,124 56,118
+      C52,136 58,154 72,162
+      C86,170 102,166 112,154
+      C128,168 148,175 168,172
+      C180,176 196,178 210,174
+      C214,172 217,171 220,170
+      Z
+      M220,170
+      C235,155 245,135 248,115
+      C265,128 290,132 312,122
+      C334,112 346,92 344,70
+      C362,80 385,78 402,64
+      C420,50 424,26 410,12
+      C426,8 436,16 438,32
+      C440,48 430,64 414,70
+      C426,80 430,96 422,108
+      C414,120 398,124 384,118
+      C388,136 382,154 368,162
+      C354,170 338,166 328,154
+      C312,168 292,175 272,172
+      C260,176 244,178 230,174
+      C226,172 223,171 220,170
+      Z
+      M220,170 C218,158 216,144 220,132 C224,144 222,158 220,170 Z
+      M220,132 C208,122 196,108 198,94 C206,102 214,118 220,132 Z
+      M220,132 C232,122 244,108 242,94 C234,102 226,118 220,132 Z
+    "/>
+  </svg>
+  <h1>Wayne Enterprises</h1>
+  <p class="subtitle">Ops Intelligence Command Center — Gotham City</p>
+  <div class="sync-badge" id="syncBadge">
+    <span class="sync-dot"></span>LIVE FEED<br>
+    <span id="syncTime">INITIALISING...</span>
+  </div>
+</header>
+
+<div class="container" id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Accessing Gotham Systems...</p>
+  </div>
+</div>
+
+<!-- Drill-down Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center">
+        <h2 id="modalTitle">Issues</h2>
+        <span class="modal-count" id="modalCount"></span>
+      </div>
+      <button class="modal-close" id="modalCloseBtn">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="issue-list" id="modalList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── CONFIG ── */
+const REPO = 'ruscoe888/always-on-agent';
+const API  = `https://api.github.com/repos/${REPO}/issues?state=all&labels=ops-agent&per_page=100`;
+
+/* ── CHART DEFAULTS ── */
+Chart.defaults.color = '#555';
+Chart.defaults.borderColor = 'rgba(255,227,0,0.07)';
+Chart.defaults.font.family = "'Rajdhani', sans-serif";
+Chart.defaults.font.size = 13;
+
+/* ── COLOURS ── */
+const C = {
+  yellow: '#FFE300',
+  triage: '#FF6B35',
+  correlation: '#29B6F6',
+  compliance: '#BA68C8',
+  P0: '#FF1744', P1: '#FF6B35', P2: '#FFE300', P3: '#29B6F6',
+};
+
+const TYPE_COLORS = [C.triage, C.correlation, C.compliance];
+const TYPE_LABELS = ['Triage', 'Correlation', 'Compliance'];
+
+/* ── DATA HELPERS ── */
+function getType(issue) {
+  const names = issue.labels.map(l => l.name);
+  if (names.includes('agent-triage'))      return 'Triage';
+  if (names.includes('agent-correlation')) return 'Correlation';
+  if (names.includes('agent-compliance'))  return 'Compliance';
+  return 'Other';
+}
+
+function getPriority(issue) {
+  const m = issue.title.match(/\((P[0-3])\)/);
+  return m ? m[1] : null;
+}
+
+function getProdId(issue) {
+  const m = issue.title.match(/PROD-\d+/);
+  return m ? m[0] : null;
+}
+
+function cleanTitle(issue) {
+  return issue.title
+    .replace(/\[Agent (Triage|Correlation|Compliance)\]\s*/i, '')
+    .replace(/\s*\(P[0-3]\)\s*$/, '')
+    .trim();
+}
+
+function fmtDate(str) {
+  return new Date(str).toLocaleString('en-GB', {
+    day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+}
+
+const now = new Date();
+function startOfToday() { const d = new Date(now); d.setHours(0,0,0,0); return d; }
+function daysAgo(n)     { const d = new Date(now); d.setDate(d.getDate() - n); return d; }
+
+function isToday(s)  { return new Date(s) >= startOfToday(); }
+function isWeek(s)   { return new Date(s) >= daysAgo(7); }
+function isMonth(s)  { return new Date(s) >= daysAgo(30); }
+
+function countByType(issues) {
+  return TYPE_LABELS.map(t => issues.filter(i => getType(i) === t).length);
+}
+
+/* ── CHARTS ── */
+const charts = {};
+
+function makeDonut(id, labels, data, colors) {
+  return new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.map(c => c + '28'),
+        borderColor: colors,
+        borderWidth: 2,
+        hoverBackgroundColor: colors.map(c => c + '55'),
+        hoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 18, usePointStyle: true, pointStyleWidth: 10, color: '#888' }
+        },
+        tooltip: {
+          callbacks: { label: ctx => `  ${ctx.label}: ${ctx.raw}` }
+        }
+      }
+    }
+  });
+}
+
+function makeBar(id, labels, data, colors, horizontal = false) {
+  return new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.map(c => c + '30'),
+        borderColor: colors,
+        borderWidth: 1.5,
+        borderRadius: 2,
+        hoverBackgroundColor: colors.map(c => c + '70'),
+      }]
+    },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `  ${ctx.raw} issues` } }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,227,0,0.05)' },
+          ticks: { color: '#555' }
+        },
+        y: {
+          grid: { color: 'rgba(255,227,0,0.05)' },
+          ticks: { color: '#555', stepSize: 1 }
+        }
+      }
+    }
+  });
+}
+
+function onChartClick(chartKey, getIssuesFn, getLabelFn) {
+  const chart = charts[chartKey];
+  if (!chart) return;
+  chart.canvas.style.cursor = 'pointer';
+  chart.canvas.addEventListener('click', e => {
+    const pts = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+    if (!pts.length) return;
+    const idx   = pts[0].index;
+    const label = getLabelFn ? getLabelFn(idx) : chart.data.labels[idx];
+    showModal(label, getIssuesFn(label, idx));
+  });
+}
+
+/* ── MODAL ── */
+function showModal(title, issues) {
+  document.getElementById('modalTitle').textContent = title.toUpperCase();
+  document.getElementById('modalCount').textContent = `— ${issues.length} issue${issues.length !== 1 ? 's' : ''}`;
+
+  const list = document.getElementById('modalList');
+  if (!issues.length) {
+    list.innerHTML = '<div class="no-data">NO ISSUES FOUND</div>';
+  } else {
+    list.innerHTML = issues
+      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      .map(issue => {
+        const type     = getType(issue);
+        const priority = getPriority(issue);
+        const prodId   = getProdId(issue);
+        const badgeKey = priority || type;
+        const badgeTxt = priority || type;
+
+        return `
+          <a class="issue-row" href="${issue.html_url}" target="_blank" rel="noopener">
+            <span class="issue-num">#${issue.number}</span>
+            <span class="issue-text">
+              ${prodId ? `<span class="prod">${prodId}:</span>` : ''}${cleanTitle(issue)}
+            </span>
+            <span class="badge badge-${badgeKey}">${badgeTxt}</span>
+            <span class="issue-date">${fmtDate(issue.created_at)}</span>
+          </a>`;
+      }).join('');
+  }
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── RENDER ── */
+function render(issues) {
+  const open        = issues.filter(i => i.state === 'open');
+  const todayAll    = issues.filter(i => isToday(i.created_at));
+  const weekAll     = issues.filter(i => isWeek(i.created_at));
+  const monthAll    = issues.filter(i => isMonth(i.created_at));
+  const p0s         = open.filter(i => getPriority(i) === 'P0');
+  const complianceO = open.filter(i => getType(i) === 'Compliance');
+
+  document.getElementById('syncTime').textContent =
+    new Date().toUTCString().slice(0, 22).toUpperCase();
+
+  document.getElementById('app').innerHTML = `
+
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card" id="sc-open">
+        <div class="label">Total Open Issues</div>
+        <div class="value">${open.length}</div>
+        <div class="sublabel">Active agent-filed issues</div>
+      </div>
+      <div class="stat-card" id="sc-today" style="--accent:#29B6F6">
+        <div class="label">New Today</div>
+        <div class="value">${todayAll.length}</div>
+        <div class="sublabel">Filed in last 24 hours</div>
+      </div>
+      <div class="stat-card" id="sc-p0" style="--accent:#FF1744">
+        <div class="label">P0 Critical</div>
+        <div class="value">${p0s.length}</div>
+        <div class="sublabel">Immediate action required</div>
+      </div>
+      <div class="stat-card" id="sc-compliance" style="--accent:#BA68C8">
+        <div class="label">Compliance Violations</div>
+        <div class="value">${complianceO.length}</div>
+        <div class="sublabel">Active policy breaches</div>
+      </div>
+    </div>
+
+    <div class="section-title">Live Intelligence</div>
+
+    <div class="charts-main">
+      <div class="chart-card">
+        <div class="card-title">Current Open — By Type</div>
+        <div class="drill-hint">click to drill down ↓</div>
+        <canvas id="ch-donut"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">New Issues Today — Leading With Type</div>
+        <div class="drill-hint">click to drill down ↓</div>
+        <canvas id="ch-today-bar"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Category Raises</div>
+
+    <div class="charts-three">
+      <div class="chart-card">
+        <div class="card-title">Today</div>
+        <div class="drill-hint">click ↓</div>
+        <canvas id="ch-cat-today"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">This Week</div>
+        <div class="drill-hint">click ↓</div>
+        <canvas id="ch-cat-week"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">This Month</div>
+        <div class="drill-hint">click ↓</div>
+        <canvas id="ch-cat-month"></canvas>
+      </div>
+    </div>
+  `;
+
+  /* Stat card clicks */
+  document.getElementById('sc-open').onclick       = () => showModal('All Open Issues', open);
+  document.getElementById('sc-today').onclick      = () => showModal('New Today', todayAll);
+  document.getElementById('sc-p0').onclick         = () => showModal('P0 Critical Incidents', p0s);
+  document.getElementById('sc-compliance').onclick = () => showModal('Compliance Violations', complianceO);
+
+  /* Chart 1 — donut */
+  charts['donut'] = makeDonut(
+    'ch-donut', TYPE_LABELS, countByType(open), TYPE_COLORS
+  );
+  onChartClick('donut',
+    (label) => open.filter(i => getType(i) === label)
+  );
+
+  /* Chart 2 — today horizontal bar */
+  charts['today-bar'] = makeBar(
+    'ch-today-bar', TYPE_LABELS, countByType(todayAll), TYPE_COLORS, true
+  );
+  onChartClick('today-bar',
+    (label) => todayAll.filter(i => getType(i) === label)
+  );
+
+  /* Chart 3 — category today */
+  charts['cat-today'] = makeBar(
+    'ch-cat-today', TYPE_LABELS, countByType(todayAll), TYPE_COLORS
+  );
+  onChartClick('cat-today',
+    (label) => todayAll.filter(i => getType(i) === label)
+  );
+
+  /* Chart 4 — category week */
+  charts['cat-week'] = makeBar(
+    'ch-cat-week', TYPE_LABELS, countByType(weekAll), TYPE_COLORS
+  );
+  onChartClick('cat-week',
+    (label) => weekAll.filter(i => getType(i) === label)
+  );
+
+  /* Chart 5 — category month */
+  charts['cat-month'] = makeBar(
+    'ch-cat-month', TYPE_LABELS, countByType(monthAll), TYPE_COLORS
+  );
+  onChartClick('cat-month',
+    (label) => monthAll.filter(i => getType(i) === label)
+  );
+}
+
+/* ── FETCH ── */
+async function init() {
+  try {
+    const res = await fetch(API, { headers: { Accept: 'application/vnd.github.v3+json' } });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}: ${res.statusText}`);
+    const issues = await res.json();
+    render(issues);
+  } catch (err) {
+    document.getElementById('app').innerHTML = `
+      <div class="error-msg">
+        <p style="font-size:2rem;margin-bottom:12px">⚠</p>
+        <p>GOTHAM COMMS OFFLINE</p>
+        <p style="margin-top:8px;font-size:0.75rem;color:#333">${err.message}</p>
+      </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
