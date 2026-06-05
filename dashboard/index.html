@@ -173,6 +173,10 @@
       color: var(--muted);
     }
 
+    .stat-card.accent-blue   { --accent: #29B6F6; }
+    .stat-card.accent-red    { --accent: #FF1744; }
+    .stat-card.accent-purple { --accent: #BA68C8; }
+
     /* ── SECTION TITLE ── */
     .section-title {
       font-family: 'Bebas Neue', cursive;
@@ -313,6 +317,8 @@
       z-index: 1;
     }
 
+    .modal-title-row { display: flex; align-items: center; }
+
     .modal-head h2 {
       font-family: 'Bebas Neue', cursive;
       font-size: 1.3rem;
@@ -412,6 +418,41 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
 
+    /* ── LIVE FEED CHART ── */
+    .live-feed-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 20px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .live-feed-card .card-title { font-family: 'Bebas Neue', cursive; font-size: 0.95rem; letter-spacing: 3px; color: var(--yellow); margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
+    .live-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 8px rgba(255,227,0,0.8); animation: pulse 1.5s ease-in-out infinite; flex-shrink: 0; }
+    .live-feed-card canvas { max-height: 120px; }
+
+    .refresh-badge {
+      position: absolute;
+      top: 18px; right: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .refresh-spinner {
+      width: 10px; height: 10px;
+      border: 1px solid var(--muted);
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      display: none;
+    }
+    .refresh-spinner.spinning { display: block; animation: spin .6s linear infinite; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 960px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -483,11 +524,11 @@
 <div class="overlay" id="overlay">
   <div class="modal" id="modal">
     <div class="modal-head">
-      <div style="display:flex;align-items:center">
+      <div class="modal-title-row">
         <h2 id="modalTitle">Issues</h2>
         <span class="modal-count" id="modalCount"></span>
       </div>
-      <button class="modal-close" id="modalCloseBtn">✕ Close</button>
+      <button type="button" class="modal-close" id="modalCloseBtn">✕ Close</button>
     </div>
     <div class="modal-body">
       <div class="issue-list" id="modalList"></div>
@@ -497,8 +538,10 @@
 
 <script>
 /* ── CONFIG ── */
-const REPO = 'ruscoe888/always-on-agent';
-const API  = `https://api.github.com/repos/${REPO}/issues?state=all&labels=ops-agent&per_page=100`;
+const REPO         = 'ruscoe888/always-on-agent';
+const API          = `https://api.github.com/repos/${REPO}/issues?state=all&labels=ops-agent&per_page=100`;
+const REFRESH_MS   = 30000;   // poll every 30s
+const LIVE_MINUTES = 60;      // rolling window for activity chart
 
 /* ── CHART DEFAULTS ── */
 Chart.defaults.color = '#555';
@@ -550,9 +593,8 @@ function fmtDate(str) {
   });
 }
 
-const now = new Date();
-function startOfToday() { const d = new Date(now); d.setHours(0,0,0,0); return d; }
-function daysAgo(n)     { const d = new Date(now); d.setDate(d.getDate() - n); return d; }
+function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function daysAgo(n)     { const d = new Date(); d.setDate(d.getDate() - n); return d; }
 
 function isToday(s)  { return new Date(s) >= startOfToday(); }
 function isWeek(s)   { return new Date(s) >= daysAgo(7); }
@@ -688,7 +730,94 @@ document.getElementById('overlay').addEventListener('click', e => {
 document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+/* ── LIVE ACTIVITY CHART ── */
+let liveChart = null;
+let allIssuesCache = [];
+
+function buildLiveBuckets(issues) {
+  const now     = new Date();
+  const buckets = [];
+  const labels  = [];
+  for (let m = LIVE_MINUTES - 1; m >= 0; m--) {
+    const start = new Date(now - (m + 1) * 60000);
+    const end   = new Date(now - m * 60000);
+    const label = m === 0 ? 'now'
+                : m % 5 === 0 ? `-${m}m`
+                : '';
+    labels.push(label);
+    buckets.push(issues.filter(i => {
+      const t = new Date(i.created_at);
+      return t >= start && t < end;
+    }).length);
+  }
+  return { labels, buckets };
+}
+
+function initLiveChart(issues) {
+  const { labels, buckets } = buildLiveBuckets(issues);
+  const ctx = document.getElementById('ch-live');
+  if (!ctx) return;
+
+  liveChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: buckets,
+        borderColor: '#FFE300',
+        borderWidth: 1.5,
+        backgroundColor: 'rgba(255,227,0,0.06)',
+        pointRadius: buckets.map(v => v > 0 ? 4 : 0),
+        pointBackgroundColor: '#FFE300',
+        pointBorderColor: '#FFE300',
+        tension: 0.35,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              const minAgo = LIVE_MINUTES - 1 - idx;
+              return minAgo === 0 ? 'Right now' : `${minAgo} min ago`;
+            },
+            label: ctx => `  ${ctx.raw} issue${ctx.raw !== 1 ? 's' : ''} filed`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,227,0,0.04)' },
+          ticks: { color: '#444', maxRotation: 0 }
+        },
+        y: {
+          grid: { color: 'rgba(255,227,0,0.04)' },
+          ticks: { color: '#444', stepSize: 1 },
+          min: 0,
+        }
+      }
+    }
+  });
+}
+
+function updateLiveChart(issues) {
+  if (!liveChart) { initLiveChart(issues); return; }
+  const { labels, buckets } = buildLiveBuckets(issues);
+  liveChart.data.labels = labels;
+  liveChart.data.datasets[0].data = buckets;
+  liveChart.data.datasets[0].pointRadius = buckets.map(v => v > 0 ? 4 : 0);
+  liveChart.update('none');
+}
+
 /* ── RENDER ── */
+let rendered = false;
+
 function render(issues) {
   const open        = issues.filter(i => i.state === 'open');
   const todayAll    = issues.filter(i => isToday(i.created_at));
@@ -697,70 +826,104 @@ function render(issues) {
   const p0s         = open.filter(i => getPriority(i) === 'P0');
   const complianceO = open.filter(i => getType(i) === 'Compliance');
 
+  allIssuesCache = issues;
+
   document.getElementById('syncTime').textContent =
     new Date().toUTCString().slice(0, 22).toUpperCase();
 
-  document.getElementById('app').innerHTML = `
+  // On first render build full DOM; on refresh only update numbers + charts
+  if (!rendered) {
+    document.getElementById('app').innerHTML = `
 
-    <!-- Stat cards -->
-    <div class="stats-row">
-      <div class="stat-card" id="sc-open">
-        <div class="label">Total Open Issues</div>
-        <div class="value">${open.length}</div>
-        <div class="sublabel">Active agent-filed issues</div>
+      <div class="stats-row">
+        <div class="stat-card" id="sc-open">
+          <div class="label">Total Open Issues</div>
+          <div class="value" id="val-open">${open.length}</div>
+          <div class="sublabel">Active agent-filed issues</div>
+        </div>
+        <div class="stat-card accent-blue" id="sc-today">
+          <div class="label">New Today</div>
+          <div class="value" id="val-today">${todayAll.length}</div>
+          <div class="sublabel">Filed in last 24 hours</div>
+        </div>
+        <div class="stat-card accent-red" id="sc-p0">
+          <div class="label">P0 Critical</div>
+          <div class="value" id="val-p0">${p0s.length}</div>
+          <div class="sublabel">Immediate action required</div>
+        </div>
+        <div class="stat-card accent-purple" id="sc-compliance">
+          <div class="label">Compliance Violations</div>
+          <div class="value" id="val-compliance">${complianceO.length}</div>
+          <div class="sublabel">Active policy breaches</div>
+        </div>
       </div>
-      <div class="stat-card" id="sc-today" style="--accent:#29B6F6">
-        <div class="label">New Today</div>
-        <div class="value">${todayAll.length}</div>
-        <div class="sublabel">Filed in last 24 hours</div>
-      </div>
-      <div class="stat-card" id="sc-p0" style="--accent:#FF1744">
-        <div class="label">P0 Critical</div>
-        <div class="value">${p0s.length}</div>
-        <div class="sublabel">Immediate action required</div>
-      </div>
-      <div class="stat-card" id="sc-compliance" style="--accent:#BA68C8">
-        <div class="label">Compliance Violations</div>
-        <div class="value">${complianceO.length}</div>
-        <div class="sublabel">Active policy breaches</div>
-      </div>
-    </div>
 
-    <div class="section-title">Live Intelligence</div>
+      <div class="section-title">Live Activity</div>
 
-    <div class="charts-main">
-      <div class="chart-card">
-        <div class="card-title">Current Open — By Type</div>
-        <div class="drill-hint">click to drill down ↓</div>
-        <canvas id="ch-donut"></canvas>
+      <div class="live-feed-card">
+        <div class="card-title">
+          <span class="live-pulse"></span>
+          Issue Feed — Rolling 60-Minute Window
+        </div>
+        <div class="refresh-badge">
+          <div class="refresh-spinner" id="spinner"></div>
+          AUTO-REFRESH 30s
+        </div>
+        <canvas id="ch-live"></canvas>
       </div>
-      <div class="chart-card">
-        <div class="card-title">New Issues Today — Leading With Type</div>
-        <div class="drill-hint">click to drill down ↓</div>
-        <canvas id="ch-today-bar"></canvas>
-      </div>
-    </div>
 
-    <div class="section-title">Category Raises</div>
+      <div class="section-title">Intelligence Breakdown</div>
 
-    <div class="charts-three">
-      <div class="chart-card">
-        <div class="card-title">Today</div>
-        <div class="drill-hint">click ↓</div>
-        <canvas id="ch-cat-today"></canvas>
+      <div class="charts-main">
+        <div class="chart-card">
+          <div class="card-title">Current Open — By Type</div>
+          <div class="drill-hint">click to drill down ↓</div>
+          <canvas id="ch-donut"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">New Issues Today — Leading With Type</div>
+          <div class="drill-hint">click to drill down ↓</div>
+          <canvas id="ch-today-bar"></canvas>
+        </div>
       </div>
-      <div class="chart-card">
-        <div class="card-title">This Week</div>
-        <div class="drill-hint">click ↓</div>
-        <canvas id="ch-cat-week"></canvas>
+
+      <div class="section-title">Category Raises</div>
+
+      <div class="charts-three">
+        <div class="chart-card">
+          <div class="card-title">Today</div>
+          <div class="drill-hint">click ↓</div>
+          <canvas id="ch-cat-today"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">This Week</div>
+          <div class="drill-hint">click ↓</div>
+          <canvas id="ch-cat-week"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">This Month</div>
+          <div class="drill-hint">click ↓</div>
+          <canvas id="ch-cat-month"></canvas>
+        </div>
       </div>
-      <div class="chart-card">
-        <div class="card-title">This Month</div>
-        <div class="drill-hint">click ↓</div>
-        <canvas id="ch-cat-month"></canvas>
-      </div>
-    </div>
-  `;
+    `;
+    rendered = true;
+  } else {
+    // Refresh — update stat numbers without rebuilding DOM
+    document.getElementById('val-open').textContent       = open.length;
+    document.getElementById('val-today').textContent      = todayAll.length;
+    document.getElementById('val-p0').textContent         = p0s.length;
+    document.getElementById('val-compliance').textContent = complianceO.length;
+  }
+
+  /* Stat card clicks */
+  document.getElementById('sc-open').onclick       = () => showModal('All Open Issues', open);
+  document.getElementById('sc-today').onclick      = () => showModal('New Today', todayAll);
+  document.getElementById('sc-p0').onclick         = () => showModal('P0 Critical Incidents', p0s);
+  document.getElementById('sc-compliance').onclick = () => showModal('Compliance Violations', complianceO);
+
+  /* Live activity chart */
+  updateLiveChart(issues);
 
   /* Stat card clicks */
   document.getElementById('sc-open').onclick       = () => showModal('All Open Issues', open);
@@ -809,24 +972,37 @@ function render(issues) {
   );
 }
 
-/* ── FETCH ── */
-async function init() {
+/* ── FETCH + AUTO-REFRESH ── */
+async function fetchAndRender() {
+  const spinner = document.getElementById('spinner');
+  if (spinner) spinner.classList.add('spinning');
   try {
     const res = await fetch(API, { headers: { Accept: 'application/vnd.github.v3+json' } });
     if (!res.ok) throw new Error(`GitHub API ${res.status}: ${res.statusText}`);
     const issues = await res.json();
     render(issues);
   } catch (err) {
-    document.getElementById('app').innerHTML = `
-      <div class="error-msg">
-        <p style="font-size:2rem;margin-bottom:12px">⚠</p>
-        <p>GOTHAM COMMS OFFLINE</p>
-        <p style="margin-top:8px;font-size:0.75rem;color:#333">${err.message}</p>
-      </div>`;
+    if (!rendered) {
+      document.getElementById('app').innerHTML = `
+        <div class="error-msg">
+          <p style="font-size:2rem;margin-bottom:12px">⚠</p>
+          <p>GOTHAM COMMS OFFLINE</p>
+          <p style="margin-top:8px;font-size:0.6rem;color:#333">${err.message}</p>
+        </div>`;
+    }
+  } finally {
+    if (spinner) spinner.classList.remove('spinning');
   }
 }
 
-init();
+// Tick the live chart every 60s even when no new data arrives
+function tickLive() {
+  if (liveChart && allIssuesCache.length) updateLiveChart(allIssuesCache);
+}
+
+fetchAndRender();
+setInterval(fetchAndRender, REFRESH_MS);
+setInterval(tickLive, 60000);
 </script>
 </body>
 </html>
