@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Always-On Ops Agent — Client Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFE300;
+      --bg: #080808;
+      --card: #101010;
+      --border: rgba(255,227,0,0.15);
+      --text: #d8d8d8;
+      --muted: #555;
+      --triage: #FF6B35;
+      --correlation: #29B6F6;
+      --compliance: #BA68C8;
+      --p0: #FF1744;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── DECK ── */
+    .deck {
+      width: 100%; height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 80px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    /* ── CHROME ── */
+    .chrome {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,0.96);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    .chrome-logo {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1rem;
+      letter-spacing: 6px;
+      color: var(--yellow);
+    }
+
+    .chrome-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 34px; height: 34px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: border-color .15s, color .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+    .nav-btn:disabled { opacity: 0.2; cursor: default; }
+
+    .slide-counter {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      min-width: 60px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--yellow);
+      box-shadow: 0 0 10px rgba(255,227,0,0.6);
+      transition: width .4s ease;
+      z-index: 101;
+    }
+
+    /* ── DOT NAV ── */
+    .dot-nav {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      border: 1px solid var(--muted);
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .2s;
+    }
+    .dot.active {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      transform: scale(1.5);
+    }
+
+    /* ── TYPOGRAPHY ── */
+    .eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .headline {
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 4px;
+      line-height: 1.05;
+      color: var(--yellow);
+    }
+
+    .h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); }
+    .h2 { font-size: clamp(1.8rem, 3.5vw, 3rem); }
+    .h3 { font-size: clamp(1.2rem, 2.5vw, 2rem); }
+
+    .body-text {
+      font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+      line-height: 1.6;
+      color: #aaa;
+      max-width: 780px;
+    }
+
+    .answer-box {
+      border-left: 4px solid var(--yellow);
+      padding: 20px 28px;
+      background: rgba(255,227,0,0.04);
+      margin: 24px 0;
+      font-size: clamp(1rem, 1.8vw, 1.3rem);
+      font-weight: 600;
+      color: var(--text);
+      max-width: 820px;
+    }
+
+    /* ── LAYOUT HELPERS ── */
+    .cols { display: grid; gap: 28px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 24px;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent, var(--yellow));
+      border-radius: 3px 0 0 3px;
+    }
+
+    .card .card-num {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 3.5rem;
+      color: var(--accent, var(--yellow));
+      line-height: 1;
+      opacity: 0.25;
+      position: absolute;
+      top: 12px; right: 18px;
+    }
+
+    .card .card-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+      color: var(--accent, var(--yellow));
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #888;
+    }
+
+    /* ── PROBLEM LIST ── */
+    .problem-list { list-style: none; display: flex; flex-direction: column; gap: 16px; max-width: 860px; }
+
+    .problem-list li {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 16px 20px;
+      background: rgba(255,23,68,0.04);
+      border: 1px solid rgba(255,23,68,0.15);
+      border-radius: 2px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #aaa;
+    }
+
+    .problem-list li .icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 900px;
+      margin: 28px 0;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 18px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step .step-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .flow-step .step-label {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      color: var(--yellow);
+      margin-bottom: 4px;
+    }
+    .flow-step .step-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+    .flow-arrow {
+      flex-shrink: 0;
+      width: 32px;
+      text-align: center;
+      color: var(--yellow);
+      font-size: 1.2rem;
+      opacity: 0.5;
+    }
+
+    /* ── STAT HIGHLIGHT ── */
+    .stat-row { display: flex; gap: 20px; margin: 24px 0; flex-wrap: wrap; }
+
+    .stat-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .stat-pill .val {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2.8rem;
+      color: var(--yellow);
+      line-height: 1;
+    }
+
+    .stat-pill .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ── PYRAMID VISUAL ── */
+    .pyramid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin: 20px 0;
+    }
+
+    .pyr-row {
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 3px;
+      cursor: default;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; max-width: 700px; }
+
+    .tl-item {
+      display: grid;
+      grid-template-columns: 110px 24px 1fr;
+      gap: 0 14px;
+      align-items: start;
+    }
+
+    .tl-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: right;
+      padding-top: 3px;
+    }
+
+    .tl-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 0 0 8px rgba(255,227,0,0.5);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .tl-connector {
+      width: 1px;
+      flex: 1;
+      min-height: 28px;
+      background: var(--border);
+    }
+
+    .tl-content {
+      padding-bottom: 22px;
+    }
+
+    .tl-content strong {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .tl-content span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── CTA SLIDE ── */
+    .cta-box {
+      border: 1px solid var(--yellow);
+      border-radius: 3px;
+      padding: 36px 40px;
+      background: rgba(255,227,0,0.03);
+      max-width: 680px;
+      margin-top: 24px;
+    }
+
+    .next-steps { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+
+    .next-steps li {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      font-size: 0.95rem;
+      color: #aaa;
+    }
+
+    .step-badge {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      background: rgba(255,227,0,0.12);
+      color: var(--yellow);
+      border: 1px solid rgba(255,227,0,0.3);
+      padding: 3px 10px;
+      border-radius: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── SLIDE-SPECIFIC BACKGROUNDS ── */
+    .slide-cover { background: radial-gradient(ellipse at 50% 0%, rgba(255,227,0,0.07) 0%, transparent 60%); }
+    .slide-answer { background: radial-gradient(ellipse at 0% 50%, rgba(255,227,0,0.04) 0%, transparent 50%); }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="chrome">
+  <span class="chrome-logo">Wayne Enterprises — Ops Intelligence</span>
+  <div class="chrome-nav">
+    <button class="nav-btn" id="prevBtn" onclick="go(-1)">&#8592;</button>
+    <span class="slide-counter" id="counter">1 / 7</span>
+    <button class="nav-btn" id="nextBtn" onclick="go(1)">&#8594;</button>
+  </div>
+</div>
+
+<div class="dot-nav" id="dotNav"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 1 — COVER
+  ════════════════════════════════════════ -->
+  <div class="slide slide-cover active" data-title="Cover">
+    <div class="eyebrow">Confidential — Client Briefing</div>
+    <div class="headline h1" style="max-width:780px">
+      Your ops team is<br>
+      <span style="opacity:.35">fighting fires</span><br>
+      instead of preventing them
+    </div>
+    <div style="margin-top:28px;max-width:580px">
+      <p class="body-text">
+        Every hour your team spends manually triaging incidents, chasing deploy correlations,
+        and auditing vendor contracts is an hour not spent on engineering that matters.
+      </p>
+    </div>
+    <div style="margin-top:48px;display:flex;align-items:center;gap:20px">
+      <div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:0.75rem;letter-spacing:4px;color:var(--muted)">Presented by</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:4px;color:var(--yellow)">Wayne Enterprises — Applied AI</div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:36px;right:60px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:2px">
+      Press → or use arrow keys to advance
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 2 — THE SITUATION
+  ════════════════════════════════════════ -->
+  <div class="slide" data-title="Situation">
+    <div class="eyebrow">The Situation</div>
+    <div class="headline h2">Sound familiar?</div>
+
+    <ul class="problem-list" style="margin-top:28px">
+      <li>
+        <span class="icon">🔔</span>
+        <div><strong style="color:var(--text);font-weight:700">Incidents land in a queue.</strong>
+        Your team reads each one, searches for a matching runbook, and manually decides severity. This takes 20-40 minutes per incident — during which your customers are waiting.</div>
+      </li>
+      <li>
+        <span class="icon">🔗</span>
+        <div><strong style="color:var(--text);font-weight:700">Deploy correlations are guesswork.</strong>
+        "Did a recent release cause this?" requires a human to cross-reference incident timestamps against deploy logs. The answer is usually obvious in hindsight — and late.</div>
+      </li>
+      <li>
+        <span class="icon">📄</span>
+        <div><strong style="color:var(--text);font-weight:700">Compliance drift goes unnoticed.</strong>
+        Vendor contracts are signed and filed. No one has time to re-audit them against your policy each quarter. Violations accumulate silently until an incident forces a review.</div>
+      </li>
+      <li>
+        <span class="icon">🌙</span>
+        <div><strong style="color:var(--text);font-weight:700">Nights and weekends are unmonitored.</strong>
+        Issues that surface at 2am sit untriaged until the morning standup. By then, enterprise customers have already called your CEO.</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 3 — THE ANSWER (PYRAMID APEX)
+  ════════════════════════════════════════ -->
+  <div class="slide slide-answer" data-title="The Answer">
+    <div class="eyebrow">The Answer — Lead With The Conclusion</div>
+    <div class="headline h2">An agent that never sleeps,<br>never misses, never forgets</div>
+
+    <div class="answer-box">
+      We built an always-on ops agent that automatically triages every incident, correlates it
+      with recent deployments, audits your vendor contracts, and files actionable GitHub Issues —
+      every four hours, with zero human intervention required.
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="val">18</div>
+        <div class="lbl">Issues filed<br>automatically</div>
+      </div>
+      <div class="stat-pill" style="border-color:rgba(255,23,68,0.3)">
+        <div class="val" style="color:#FF1744">0</div>
+        <div class="lbl">Permission prompts<br>required</div>
+      </div>
+      <div class="stat-pill" style="border-color:rgba(41,182,246,0.3)">
+        <div class="val" style="color:#29B6F6">4h</div>
+        <div class="lbl">Max time to detect<br>a new incident</div>
+      </div>
+      <div class="stat-pill" style="border-color:rgba(186,104,200,0.3)">
+        <div class="val" style="color:#BA68C8">9</div>
+        <div class="lbl">Compliance violations<br>auto-detected</div>
+      </div>
+    </div>
+
+    <p class="body-text" style="margin-top:8px">
+      It runs whether you are in a meeting, asleep, or on holiday. New data in the repo triggers
+      a full re-analysis on the next cycle. Findings that are already filed are skipped — no noise, no duplicates.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 4 — HOW IT WORKS
+  ════════════════════════════════════════ -->
+  <div class="slide" data-title="How It Works">
+    <div class="eyebrow">Supporting Argument 1 — Architecture</div>
+    <div class="headline h2">Two layers. One agent.</div>
+
+    <div class="flow" style="margin-top:28px">
+      <div class="flow-step">
+        <div class="step-icon">⏰</div>
+        <div class="step-label">Cron Fires</div>
+        <div class="step-desc">Every 4 hours. Durable — survives restarts. No infrastructure needed.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-icon">📥</div>
+        <div class="step-label">Git Pull</div>
+        <div class="step-desc">Fetches the latest issues, deploys, and contracts from the repo.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-icon">🧠</div>
+        <div class="step-label">CLAUDE.md</div>
+        <div class="step-desc">The agent's brain. All rules, logic, and output formats — versioned in git.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-icon">🔍</div>
+        <div class="step-label">Dedup Check</div>
+        <div class="step-desc">Reads existing GitHub Issues. Skips anything already reported.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-icon">📋</div>
+        <div class="step-label">Issues Filed</div>
+        <div class="step-desc">Net-new findings only. Labelled, structured, and linked to source data.</div>
+      </div>
+    </div>
+
+    <div class="cols cols-3" style="margin-top:20px;max-width:900px">
+      <div class="card" style="--accent:var(--triage)">
+        <div class="card-num">1</div>
+        <div class="card-label">Task One</div>
+        <h3>Ops Triage</h3>
+        <p>Assigns P0–P3 severity, matches runbooks, recommends on-call team and specific fix steps.</p>
+      </div>
+      <div class="card" style="--accent:var(--correlation)">
+        <div class="card-num">2</div>
+        <div class="card-label">Task Two</div>
+        <h3>Incident Correlation</h3>
+        <p>Cross-references incidents with deployments within 48 hours. Identifies causal chains and recommends rollbacks.</p>
+      </div>
+      <div class="card" style="--accent:var(--compliance)">
+        <div class="card-num">3</div>
+        <div class="card-label">Task Three</div>
+        <h3>Compliance Audit</h3>
+        <p>Checks every vendor contract against your 7-rule policy. Flags violations by severity with exact clause references.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 5 — PROOF: WHAT IT FOUND
+  ════════════════════════════════════════ -->
+  <div class="slide" data-title="Proof">
+    <div class="eyebrow">Supporting Argument 2 — Evidence From a Real Run</div>
+    <div class="headline h2">What it found in the first run</div>
+
+    <div class="cols cols-2" style="margin-top:28px;max-width:1100px;gap:20px">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">INCIDENTS TRIAGED</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-time">PROD-4521</div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--p0);box-shadow:0 0 8px rgba(255,23,68,0.6)"></div><div class="tl-connector"></div></div>
+            <div class="tl-content"><strong>P0 — PaymentService NPE</strong><span>Correlated to payment-service v4.8.2 deployed 14 min prior. Rollback recommended.</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-time">PROD-4487</div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--p1);box-shadow:0 0 8px rgba(255,107,53,0.6)"></div><div class="tl-connector"></div></div>
+            <div class="tl-content"><strong>P1 — Acme Corp Checkout Broken</strong><span>Causal chain found: feature flag + NPE bug. 2,400 users affected.</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-time">PROD-4519</div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--p0);box-shadow:0 0 8px rgba(255,227,0,0.4)"></div><div class="tl-connector"></div></div>
+            <div class="tl-content"><strong>P2 — Slow Image Uploads</strong><span>Signing-service URL TTL reduced from 3600s to 300s. Rollback available.</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-time">PROD-4533</div>
+            <div class="tl-line"><div class="tl-dot" style="background:var(--p1)"></div><div class="tl-connector" style="display:none"></div></div>
+            <div class="tl-content"><strong>P1 — Reporting DB Timeouts</strong><span>New issue added to repo mid-session. Auto-detected on next cycle. Zero prompts.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">COMPLIANCE VIOLATIONS DETECTED</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF1744">
+            <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">CRITICAL</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — Data processed in Malaysia only. No EU residency guarantee.</div>
+          </div>
+          <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF6B35">
+            <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">HIGH</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — 5-year lock-in, no termination for convenience. 365-day notice.</div>
+          </div>
+          <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF6B35">
+            <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">HIGH</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Sirius Storage — Liability cap 3 months (policy requires 12). Includes data breach.</div>
+          </div>
+          <div style="padding:12px 16px;background:#0c0c0c;border:1px solid rgba(186,104,200,0.2);border-radius:2px;border-left:3px solid #FF1744">
+            <div style="font-size:0.65rem;letter-spacing:2px;color:var(--muted);font-family:'Share Tech Mono',monospace">CRITICAL</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-top:3px">Acme Data Platform — Breach notification 96h (policy requires 72h).</div>
+          </div>
+          <div style="padding:10px 16px;background:#0c0c0c;border:1px solid rgba(255,227,0,0.06);border-radius:2px;font-size:0.8rem;color:var(--muted)">
+            +5 further violations across both contracts →
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 6 — LIVE DASHBOARD
+  ════════════════════════════════════════ -->
+  <div class="slide" data-title="Dashboard">
+    <div class="eyebrow">Supporting Argument 3 — Visibility</div>
+    <div class="headline h2">Command-centre visibility<br>for your entire team</div>
+
+    <div class="cols cols-2" style="margin-top:28px;gap:28px;align-items:center;max-width:1100px">
+      <div>
+        <p class="body-text" style="margin-bottom:20px">
+          Every finding the agent creates is surfaced in a live operations dashboard.
+          No login required. No separate tool to learn.
+        </p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
+            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
+            <span><strong style="color:var(--text)">Real-time stats</strong> — open issues, P0s, new today, compliance violations at a glance</span>
+          </li>
+          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
+            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
+            <span><strong style="color:var(--text)">Five drilldown charts</strong> — by type, by day, by week, by month. Click any segment to see the individual issues</span>
+          </li>
+          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
+            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
+            <span><strong style="color:var(--text)">Zero infrastructure</strong> — a single HTML file that reads live from the GitHub API. Share the URL, done</span>
+          </li>
+          <li style="display:flex;gap:14px;align-items:flex-start;font-size:0.9rem;color:#aaa">
+            <span style="color:var(--yellow);font-size:1rem;flex-shrink:0">◆</span>
+            <span><strong style="color:var(--text)">Automatic updates</strong> — every agent run adds new data. The dashboard reflects it on next refresh</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Stylised dashboard preview -->
+      <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:4px;padding:20px;font-family:'Share Tech Mono',monospace">
+        <div style="font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:10px">WAYNE ENTERPRISES — COMMAND CENTER</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div style="background:#111;border:1px solid var(--border);border-left:3px solid var(--yellow);padding:10px 12px">
+            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">OPEN ISSUES</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--yellow)">20</div>
+          </div>
+          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #FF1744;padding:10px 12px">
+            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">P0 CRITICAL</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#FF1744">1</div>
+          </div>
+          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #29B6F6;padding:10px 12px">
+            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">NEW TODAY</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#29B6F6">20</div>
+          </div>
+          <div style="background:#111;border:1px solid var(--border);border-left:3px solid #BA68C8;padding:10px 12px">
+            <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted)">COMPLIANCE</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:#BA68C8">9</div>
+          </div>
+        </div>
+        <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">BREAKDOWN BY TYPE — CLICK TO DRILL DOWN</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:0.6rem;color:var(--triage);width:70px">TRIAGE</div>
+            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:36%;background:var(--triage);opacity:0.7"></div></div>
+            <div style="font-size:0.6rem;color:var(--muted)">5</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:0.6rem;color:var(--correlation);width:70px">CORRELAT.</div>
+            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:28%;background:var(--correlation);opacity:0.7"></div></div>
+            <div style="font-size:0.6rem;color:var(--muted)">4</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:0.6rem;color:var(--compliance);width:70px">COMPLIAN.</div>
+            <div style="flex:1;height:8px;background:#111;border-radius:1px;overflow:hidden"><div style="height:100%;width:64%;background:var(--compliance);opacity:0.7"></div></div>
+            <div style="font-size:0.6rem;color:var(--muted)">9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 7 — NEXT STEPS / CTA
+  ════════════════════════════════════════ -->
+  <div class="slide" data-title="Next Steps">
+    <div class="eyebrow">Recommendation</div>
+    <div class="headline h2">What we do next, together</div>
+
+    <div class="cols cols-2" style="margin-top:28px;gap:36px;max-width:1100px;align-items:start">
+      <div>
+        <div class="cta-box">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">IMMEDIATE ACTIONS — THIS WEEK</div>
+          <ul class="next-steps">
+            <li><span class="step-badge">Step 1</span>Fork this pattern into your own repo — point the agent at your real incident data</li>
+            <li><span class="step-badge">Step 2</span>Extend CLAUDE.md with your runbooks, your severity definitions, your compliance policy</li>
+            <li><span class="step-badge">Step 3</span>Add your Slack or PagerDuty webhook so P0s page on-call immediately</li>
+            <li><span class="step-badge">Step 4</span>Schedule the 7-day cron renewal — or promote to a persistent GitHub Action for full autonomy</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">WHAT YOU WALK AWAY WITH TODAY</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
+            <span style="font-size:1.2rem">✅</span>
+            <span>A working always-on agent in your GitHub repo — <strong style="color:var(--yellow)">running right now</strong></span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
+            <span style="font-size:1.2rem">✅</span>
+            <span>20 auto-filed GitHub Issues — triage, correlation, and compliance findings</span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
+            <span style="font-size:1.2rem">✅</span>
+            <span>A live ops dashboard requiring no infrastructure or backend</span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
+            <span style="font-size:1.2rem">✅</span>
+            <span>A versioned, extensible CLAUDE.md you own and can evolve</span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:#0c0c0c;border:1px solid var(--border);border-radius:2px;font-size:0.88rem">
+            <span style="font-size:1.2rem">✅</span>
+            <span>Zero ongoing infrastructure cost — runs inside Claude Code</span>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;padding:16px 20px;border:1px solid rgba(255,227,0,0.25);background:rgba(255,227,0,0.03);border-radius:2px;font-size:0.88rem;color:#aaa">
+          <strong style="color:var(--yellow)">The agent paid for itself</strong> before this presentation ended. It found 9 compliance violations your legal team hasn't seen yet — including a vendor with no termination clause for 5 years.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let cur      = 0;
+
+  const dotNav = document.getElementById('dotNav');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.title = slides[i].dataset.title || '';
+    d.onclick = () => goTo(i);
+    dotNav.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotNav.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(n, total - 1));
+    slides[cur].classList.add('active');
+    dotNav.children[cur].classList.add('active');
+    document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total - 1;
+    document.getElementById('progressBar').style.width = `${((cur + 1) / total) * 100}%`;
+  }
+
+  function go(dir) { goTo(cur + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>
