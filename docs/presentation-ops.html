@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Always-On Agent — Ops Team Briefing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange: #FF6B35;
+      --bg: #080808;
+      --card: #101010;
+      --border: rgba(255,107,53,0.18);
+      --text: #d8d8d8;
+      --muted: #555;
+      --triage: #FF6B35;
+      --correlation: #29B6F6;
+      --compliance: #BA68C8;
+      --p0: #FF1744;
+      --p1: #FF6B35;
+      --p2: #FFE300;
+      --p3: #29B6F6;
+      --green: #00E676;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+
+    .deck { width: 100%; height: 100%; position: relative; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 72px 80px 60px; opacity: 0; pointer-events: none; transform: translateY(20px); transition: opacity .4s ease, transform .4s ease; overflow-y: auto; }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+    .chrome { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; border-bottom: 1px solid var(--border); background: rgba(8,8,8,0.96); backdrop-filter: blur(8px); z-index: 100; }
+    .chrome-logo { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 3px; color: var(--muted); }
+    .chrome-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; color: var(--orange); border: 1px solid rgba(255,107,53,0.3); padding: 3px 10px; border-radius: 2px; }
+    .chrome-nav { display: flex; align-items: center; gap: 10px; }
+    .nav-btn { background: none; border: 1px solid var(--border); color: var(--muted); width: 32px; height: 32px; border-radius: 2px; cursor: pointer; font-size: 1rem; transition: border-color .15s, color .15s; display: flex; align-items: center; justify-content: center; }
+    .nav-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .nav-btn:disabled { opacity: 0.2; cursor: default; }
+    .slide-counter { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); min-width: 60px; text-align: center; letter-spacing: 2px; }
+    .progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--orange); box-shadow: 0 0 10px rgba(255,107,53,0.5); transition: width .4s ease; z-index: 101; }
+    .dot-nav { position: fixed; right: 24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--muted); cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+    .dot.active { background: var(--orange); border-color: var(--orange); transform: scale(1.6); }
+
+    .eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .headline { font-family: 'Bebas Neue', cursive; letter-spacing: 4px; line-height: 1.05; }
+    .h1 { font-size: clamp(2rem, 4vw, 3.6rem); color: var(--orange); }
+    .h2 { font-size: clamp(1.6rem, 3vw, 2.6rem); color: var(--orange); }
+    .body-text { font-size: clamp(0.88rem, 1.4vw, 1.05rem); line-height: 1.65; color: #999; max-width: 820px; }
+
+    .cols { display: grid; gap: 20px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 3px; padding: 20px 22px; position: relative; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent, var(--orange)); border-radius: 3px 0 0 3px; }
+    .card h3 { font-family: 'Bebas Neue', cursive; font-size: 1.1rem; letter-spacing: 3px; color: var(--accent, var(--orange)); margin-bottom: 8px; }
+    .card p { font-size: 0.85rem; line-height: 1.6; color: #777; }
+
+    /* before/after */
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1000px; }
+    .comp-col { padding: 20px 22px; border-radius: 3px; }
+    .comp-col.before { background: rgba(255,23,68,0.04); border: 1px solid rgba(255,23,68,0.15); }
+    .comp-col.after { background: rgba(0,230,118,0.04); border: 1px solid rgba(0,230,118,0.15); }
+    .comp-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 4px; margin-bottom: 14px; }
+    .comp-col.before .comp-label { color: var(--p0); }
+    .comp-col.after .comp-label { color: var(--green); }
+    .comp-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.88rem; line-height: 1.5; color: #888; align-items: flex-start; }
+    .comp-item .ci { flex-shrink: 0; font-size: 1rem; }
+
+    /* process steps */
+    .steps { display: flex; flex-direction: column; gap: 0; max-width: 800px; }
+    .step-item { display: grid; grid-template-columns: 52px 1fr; gap: 0; }
+    .step-num-col { display: flex; flex-direction: column; align-items: center; }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--orange); background: rgba(255,107,53,0.1); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; color: var(--orange); flex-shrink: 0; }
+    .step-connector { width: 2px; flex: 1; background: rgba(255,107,53,0.15); min-height: 20px; margin: 4px 0; }
+    .step-content { padding: 4px 0 24px 14px; }
+    .step-content strong { display: block; font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .step-content span { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .step-content .example { margin-top: 8px; padding: 10px 14px; background: #0a0a0a; border: 1px solid rgba(255,107,53,0.1); border-radius: 2px; font-size: 0.8rem; color: #777; font-style: italic; }
+
+    /* issue anatomy */
+    .issue-anatomy { background: #0a0a0a; border: 1px solid rgba(255,107,53,0.2); border-radius: 3px; padding: 20px 24px; max-width: 860px; font-family: 'Share Tech Mono', monospace; }
+    .ia-title { font-size: 0.88rem; color: var(--orange); margin-bottom: 12px; font-style: normal; }
+    .ia-row { display: flex; gap: 16px; margin-bottom: 8px; align-items: flex-start; font-size: 0.75rem; }
+    .ia-key { color: var(--muted); min-width: 100px; flex-shrink: 0; }
+    .ia-val { color: #999; line-height: 1.5; }
+    .ia-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .ia-body { font-size: 0.75rem; color: #666; line-height: 1.8; }
+
+    /* faq */
+    .faq { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
+    .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+    .faq-q { padding: 14px 18px; font-size: 0.9rem; font-weight: 700; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '▼'; font-size: 0.6rem; color: var(--muted); }
+    .faq-a { padding: 0 18px 14px; font-size: 0.84rem; color: #777; line-height: 1.6; }
+
+    /* label pills */
+    .label-demo { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .lp { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; padding: 4px 12px; border-radius: 2px; border: 1px solid; }
+    .lp-blue { color: #1d76db; border-color: #1d76db; background: rgba(29,118,219,0.1); }
+    .lp-orange { color: var(--triage); border-color: var(--triage); background: rgba(255,107,53,0.1); }
+    .lp-sky { color: var(--correlation); border-color: var(--correlation); background: rgba(41,182,246,0.1); }
+    .lp-purple { color: var(--compliance); border-color: var(--compliance); background: rgba(186,104,200,0.1); }
+
+    /* severity table */
+    .sev-table { width: 100%; max-width: 900px; border-collapse: collapse; font-size: 0.85rem; }
+    .sev-table th { font-family: 'Share Tech Mono', monospace; font-size: 0.58rem; letter-spacing: 3px; color: var(--muted); text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--border); font-weight: 400; }
+    .sev-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #888; line-height: 1.5; vertical-align: top; }
+    .sev-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
+    .b-p0 { color: var(--p0); border: 1px solid var(--p0); background: rgba(255,23,68,.12); }
+    .b-p1 { color: var(--p1); border: 1px solid var(--p1); background: rgba(255,107,53,.12); }
+    .b-p2 { color: var(--p2); border: 1px solid var(--p2); background: rgba(255,227,0,.12); }
+    .b-p3 { color: var(--p3); border: 1px solid var(--p3); background: rgba(41,182,246,.12); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="chrome">
+  <span class="chrome-logo">ALWAYS-ON OPS AGENT — OPS TEAM BRIEFING</span>
+  <span class="chrome-tag">INTERNAL // OPERATIONS</span>
+  <div class="chrome-nav">
+    <button class="nav-btn" id="prevBtn" onclick="go(-1)">&#8592;</button>
+    <span class="slide-counter" id="counter">1 / 7</span>
+    <button class="nav-btn" id="nextBtn" onclick="go(1)">&#8594;</button>
+  </div>
+</div>
+
+<div class="dot-nav" id="dotNav"></div>
+
+<div class="deck">
+
+  <!-- SLIDE 1: WHAT CHANGED FOR YOU -->
+  <div class="slide active" data-title="What Changed">
+    <div class="eyebrow">Ops Team Briefing — Always-On Agent</div>
+    <div class="headline h1">Your triage queue<br>now has a first responder</div>
+    <div style="margin-top:20px;max-width:700px">
+      <p class="body-text">An automated agent now runs every four hours and does the first pass on every open incident — severity assignment, runbook lookup, deploy correlation, and compliance checks. This brief explains what it does, what it creates, what you need to action, and what it doesn't cover.</p>
+    </div>
+    <div style="margin-top:32px;display:flex;gap:32px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px">WHAT IT CREATES</div>
+        <div class="label-demo">
+          <span class="lp lp-blue">ops-agent</span>
+          <span class="lp lp-orange">agent-triage</span>
+          <span class="lp lp-sky">agent-correlation</span>
+          <span class="lp lp-purple">agent-compliance</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px">WHERE TO FIND THEM</div>
+        <div style="font-size:0.85rem;color:#777;line-height:1.8">
+          GitHub → ruscoe888/always-on-agent → Issues<br>
+          Filter by label: <code style="font-family:'Share Tech Mono',monospace;color:var(--orange)">ops-agent</code>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px">RUNS AT</div>
+        <div style="font-size:0.85rem;color:#777;line-height:1.8">
+          Every 4 hours at :17 past the hour<br>
+          00:17 · 04:17 · 08:17 · 12:17 · 16:17 · 20:17
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: BEFORE AND AFTER -->
+  <div class="slide" data-title="Before / After">
+    <div class="eyebrow">What Changed For Your Team</div>
+    <div class="headline h2">Your morning looked different yesterday</div>
+
+    <div class="comparison" style="margin-top:24px">
+      <div class="comp-col before">
+        <div class="comp-label">BEFORE — Manual First Response</div>
+        <div class="comp-item"><span class="ci">🕐</span><span>Alert fires. Engineer reads it, decides if it's real or noise. 5-15 minutes before anyone acts.</span></div>
+        <div class="comp-item"><span class="ci">📖</span><span>Search Confluence for the right runbook. Hope it's up to date. Hope someone remembers which service owns what.</span></div>
+        <div class="comp-item"><span class="ci">🔍</span><span>Manually check deploy logs: "did anything go out in the last hour that could have caused this?" Another 10 minutes.</span></div>
+        <div class="comp-item"><span class="ci">📋</span><span>Vendor contract compliance? Reviewed once at signing, filed, never touched again.</span></div>
+        <div class="comp-item"><span class="ci">🌙</span><span>2am incident sits untriaged until standup. Customer has already escalated.</span></div>
+      </div>
+      <div class="comp-col after">
+        <div class="comp-label">AFTER — Agent First Response</div>
+        <div class="comp-item"><span class="ci">⚡</span><span>Within 4 hours of any new incident appearing in the repo, the agent has read it, assigned severity, and filed a structured GitHub Issue.</span></div>
+        <div class="comp-item"><span class="ci">📋</span><span>The issue body already contains the matching runbook, the specific fix steps, and which on-call team to page.</span></div>
+        <div class="comp-item"><span class="ci">🔗</span><span>If a deploy in the last 48 hours could have caused it, the agent has already identified it — including whether a rollback is available.</span></div>
+        <div class="comp-item"><span class="ci">⚖️</span><span>Vendor contracts are re-audited on every run. New violations are filed automatically. Your legal team has a live list.</span></div>
+        <div class="comp-item"><span class="ci">✅</span><span>Your team arrives to a pre-triaged queue. You decide what to act on, not what to read first.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: HOW TO READ AN AGENT ISSUE -->
+  <div class="slide" data-title="Reading Issues">
+    <div class="eyebrow">How To Use This In Your Daily Workflow</div>
+    <div class="headline h2">Reading an agent-filed issue</div>
+
+    <div class="cols cols-2" style="margin-top:20px;max-width:1100px">
+      <div>
+        <p class="body-text" style="margin-bottom:16px">Every issue the agent creates follows the same format. Here's what each section means and what you need to do with it.</p>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--orange);align-self:center">TITLE</div>
+            <div style="color:#888"><code style="font-family:'Share Tech Mono',monospace;color:var(--orange)">[Agent Triage]</code> tells you the agent filed it. The severity badge <code style="font-family:'Share Tech Mono',monospace;color:var(--orange)">(P1)</code> is in the title so you can triage the list without opening each issue.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--correlation);align-self:center">SEVERITY</div>
+            <div style="color:#888">The agent's assigned severity with its reasoning. Treat this as an informed first opinion — you can override it. If you disagree, update the issue and document why so we can improve the rubric.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--green);align-self:center">RUNBOOK</div>
+            <div style="color:#888">The matched runbook file. If matched: the recommended fix steps are in the body — act on them. If "No matching runbook found": the incident is novel; you'll need to diagnose manually and should consider adding a new runbook.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--muted);align-self:center">ESCALATION</div>
+            <div style="color:#888">Which on-call team to page. Check this first for P0/P1 — the agent will have identified the right team based on the service area.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(255,107,53,0.04);border:1px solid rgba(255,107,53,0.2);border-radius:2px;font-size:0.84rem;color:#888">
+          <strong style="color:var(--orange)">Important:</strong> The agent files issues — it does not close them. Once you've resolved an incident or addressed a compliance violation, close the GitHub Issue manually. This keeps the dashboard accurate.
+        </div>
+      </div>
+
+      <div class="issue-anatomy">
+        <div class="ia-title">[Agent Triage] PROD-4521: NullPointerException in PaymentService (P0)</div>
+        <div style="margin-bottom:12px">
+          <span class="lp lp-blue" style="font-size:0.6rem;padding:2px 8px">ops-agent</span>
+          <span class="lp lp-orange" style="font-size:0.6rem;padding:2px 8px;margin-left:6px">agent-triage</span>
+        </div>
+        <div class="ia-row">
+          <div class="ia-key">## Severity</div>
+          <div class="ia-val">P0 — Active outage. p99 latency 8.2s. Error rate +340%. ~2,400 active checkouts affected. Revenue impact ongoing.</div>
+        </div>
+        <div class="ia-row">
+          <div class="ia-key">## Runbook</div>
+          <div class="ia-val">✅ runbooks/payment-service-degraded.md</div>
+        </div>
+        <div class="ia-section">
+          <div class="ia-row">
+            <div class="ia-key">## Action</div>
+            <div class="ia-val">
+              1. Check payment-service v4.8.2 — deployed 14 min before incident<br>
+              2. NPE at PaymentService.java:142 — null savedPaymentMethod in guest checkout flow<br>
+              3. Rollback to v4.8.1 available ← RECOMMENDED<br>
+              4. Check status.stripe.com to rule out upstream
+            </div>
+          </div>
+        </div>
+        <div class="ia-section">
+          <div class="ia-row">
+            <div class="ia-key">## Escalation</div>
+            <div class="ia-val">#payments-oncall — page immediately</div>
+          </div>
+          <div class="ia-row">
+            <div class="ia-key">## Source</div>
+            <div class="ia-val">issues/PROD-4521.json · runbooks/payment-service-degraded.md</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: SEVERITY GUIDE -->
+  <div class="slide" data-title="Severity Guide">
+    <div class="eyebrow">Reference — Severity Definitions</div>
+    <div class="headline h2">What P0–P3 means in practice</div>
+
+    <div style="margin-top:20px">
+      <table class="sev-table">
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>What it means</th>
+            <th>Real example from this run</th>
+            <th>Your response</th>
+            <th>SLA expectation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sev-badge b-p0">P0</span></td>
+            <td>Active revenue-impacting outage. Multiple customers or entire service down.</td>
+            <td>PROD-4521: PaymentService NPE. 2,400 checkouts broken. Error rate up 340%.</td>
+            <td>Page on-call immediately. Do not wait for standup. Initiate incident bridge.</td>
+            <td>Acknowledge within 15 min. Update every 30 min.</td>
+          </tr>
+          <tr>
+            <td><span class="sev-badge b-p1">P1</span></td>
+            <td>Single enterprise customer affected, or significant degradation with workaround.</td>
+            <td>PROD-4487: Acme Corp checkout broken. 2,400 users. CTO on a call with CSM.</td>
+            <td>Page on-call and notify CSM within 1 hour. Workaround first if available.</td>
+            <td>Acknowledge within 1h. Resolution or workaround within 4h.</td>
+          </tr>
+          <tr>
+            <td><span class="sev-badge b-p2">P2</span></td>
+            <td>Intermittent degradation, limited blast radius, self-recovering.</td>
+            <td>PROD-4498: Login 502s in 30s windows, 3 times in 24h. Self-resolving each time.</td>
+            <td>Assign to next sprint or on-call team for investigation within 24h.</td>
+            <td>Acknowledge within 24h. Fix within 5 business days.</td>
+          </tr>
+          <tr>
+            <td><span class="sev-badge b-p3">P3</span></td>
+            <td>Feature request, minor inconvenience, no customer impact.</td>
+            <td>PROD-4506: Parallel batch job support — internal engineering request.</td>
+            <td>Route to product backlog. No urgency.</td>
+            <td>No SLA. Prioritise in sprint planning.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px;padding:14px 18px;background:rgba(255,107,53,0.04);border:1px solid rgba(255,107,53,0.15);border-radius:2px;font-size:0.84rem;color:#888;max-width:900px">
+        <strong style="color:var(--orange)">If you disagree with the severity:</strong> Override it by editing the issue title and leaving a comment explaining your reasoning. This feedback helps improve the rubric in CLAUDE.md. The agent will not re-assign severity on re-runs — it deduplicates by PROD-ID, so your override is preserved.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: WHAT THE AGENT FOUND THIS RUN -->
+  <div class="slide" data-title="This Run">
+    <div class="eyebrow">First Run Results — What The Agent Found</div>
+    <div class="headline h2">20 issues filed. Zero missed.</div>
+
+    <div class="cols cols-3" style="margin-top:20px;max-width:1100px;gap:16px">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--triage);margin-bottom:12px">TRIAGE (5 issues)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px 14px;background:var(--card);border:1px solid rgba(255,23,68,0.2);border-radius:2px;font-size:0.82rem">
+            <span class="sev-badge b-p0" style="font-size:0.6rem">P0</span>
+            <div style="margin-top:6px;color:#999">PaymentService NPE — checkouts broken across us-east-1 and eu-west-2</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border:1px solid rgba(255,107,53,0.2);border-radius:2px;font-size:0.82rem">
+            <span class="sev-badge b-p1" style="font-size:0.6rem">P1</span>
+            <div style="margin-top:6px;color:#999">Acme Corp checkout spinner — 2,400 users, CTO escalation</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border:1px solid rgba(255,107,53,0.2);border-radius:2px;font-size:0.82rem">
+            <span class="sev-badge b-p1" style="font-size:0.6rem">P1</span>
+            <div style="margin-top:6px;color:#999">Reporting DB timeouts — 3 enterprise customers, 18% error rate</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border:1px solid rgba(255,227,0,0.15);border-radius:2px;font-size:0.82rem">
+            <span class="sev-badge b-p2" style="font-size:0.6rem">P2</span>
+            <div style="margin-top:6px;color:#999">Login 502 windows — intermittent, self-resolving</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border:1px solid rgba(255,227,0,0.15);border-radius:2px;font-size:0.82rem">
+            <span class="sev-badge b-p2" style="font-size:0.6rem">P2</span>
+            <div style="margin-top:6px;color:#999">Slow image uploads — 30-60s on iOS and Android</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--correlation);margin-bottom:12px">CORRELATIONS (4 issues)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:12px 14px;background:var(--card);border:1px solid rgba(41,182,246,0.15);border-radius:2px;font-size:0.82rem;color:#888">
+            <div style="color:var(--correlation);font-family:'Share Tech Mono',monospace;font-size:0.6rem;margin-bottom:6px">PROD-4521 ← payment-service v4.8.2</div>
+            Deployed 14 min before incident. Rollback to v4.8.1 available and recommended.
+          </div>
+          <div style="padding:12px 14px;background:var(--card);border:1px solid rgba(41,182,246,0.15);border-radius:2px;font-size:0.82rem;color:#888">
+            <div style="color:var(--correlation);font-family:'Share Tech Mono',monospace;font-size:0.6rem;margin-bottom:6px">PROD-4487 ← CAUSAL CHAIN</div>
+            payment-service v4.8.2 (NPE bug) + tenant-config v3.2.1 (enabled flag for Acme). Both rollbacks available.
+          </div>
+          <div style="padding:12px 14px;background:var(--card);border:1px solid rgba(41,182,246,0.15);border-radius:2px;font-size:0.82rem;color:#888">
+            <div style="color:var(--correlation);font-family:'Share Tech Mono',monospace;font-size:0.6rem;margin-bottom:6px">PROD-4519 ← signing-service v2.1.4</div>
+            URL TTL reduced from 3600s to 300s. Rollback available.
+          </div>
+          <div style="padding:12px 14px;background:var(--card);border:1px solid rgba(41,182,246,0.15);border-radius:2px;font-size:0.82rem;color:#888">
+            <div style="color:var(--correlation);font-family:'Share Tech Mono',monospace;font-size:0.6rem;margin-bottom:6px">PROD-4498 ← auth-service v6.0.0</div>
+            Redis migration may have exacerbated pool exhaustion. No rollback available.
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--compliance);margin-bottom:12px">COMPLIANCE (9 violations)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="padding:10px 14px;background:var(--card);border-left:3px solid var(--p0);border:1px solid rgba(186,104,200,0.1);border-radius:2px;font-size:0.78rem;color:#888">
+            <div style="color:var(--p0);font-family:'Share Tech Mono',monospace;font-size:0.58rem;margin-bottom:4px">CRITICAL</div>
+            Sirius Storage: EU data processed in Malaysia/Singapore only
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border-left:3px solid var(--p0);border:1px solid rgba(186,104,200,0.1);border-radius:2px;font-size:0.78rem;color:#888">
+            <div style="color:var(--p0);font-family:'Share Tech Mono',monospace;font-size:0.58rem;margin-bottom:4px">CRITICAL</div>
+            Sirius Storage: Breach notification "in due course" — no 72h window
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border-left:3px solid var(--p1);border:1px solid rgba(186,104,200,0.1);border-radius:2px;font-size:0.78rem;color:#888">
+            <div style="color:var(--p1);font-family:'Share Tech Mono',monospace;font-size:0.58rem;margin-bottom:4px">HIGH</div>
+            Sirius Storage: 5-year lock-in, no termination for convenience
+          </div>
+          <div style="padding:10px 14px;background:var(--card);border-left:3px solid var(--p0);border:1px solid rgba(186,104,200,0.1);border-radius:2px;font-size:0.78rem;color:#888">
+            <div style="color:var(--p0);font-family:'Share Tech Mono',monospace;font-size:0.58rem;margin-bottom:4px">CRITICAL</div>
+            Acme Data Platform: 96h breach notification (policy requires 72h)
+          </div>
+          <div style="padding:8px 14px;background:#0a0a0a;border:1px solid rgba(255,255,255,0.04);border-radius:2px;font-size:0.75rem;color:var(--muted)">
+            + 5 further violations → view all in GitHub Issues
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: YOUR DAILY WORKFLOW -->
+  <div class="slide" data-title="Daily Workflow">
+    <div class="eyebrow">How To Integrate This Into Your Routine</div>
+    <div class="headline h2">A suggested daily workflow</div>
+
+    <div class="cols cols-2" style="margin-top:20px;max-width:1100px;gap:36px;align-items:start">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">MORNING (START OF SHIFT)</div>
+        <div class="steps">
+          <div class="step-item">
+            <div class="step-num-col"><div class="step-num">1</div><div class="step-connector"></div></div>
+            <div class="step-content">
+              <strong>Open GitHub Issues filtered by ops-agent</strong>
+              <span>Filter: label = ops-agent, state = open. The agent runs at 04:17 so overnight incidents will already be triaged when you arrive.</span>
+              <div class="example">github.com/ruscoe888/always-on-agent/issues?q=label%3Aops-agent+is%3Aopen</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-col"><div class="step-num">2</div><div class="step-connector"></div></div>
+            <div class="step-content">
+              <strong>Scan for P0 and P1 first</strong>
+              <span>The severity is in the issue title. If any P0 is open and unassigned, that's your first action before anything else.</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-col"><div class="step-num">3</div><div class="step-connector"></div></div>
+            <div class="step-content">
+              <strong>Check the correlation issues for P0/P1s</strong>
+              <span>Filter by agent-correlation. If a P0 has a correlated deploy with rollback available, that rollback recommendation should be your first action.</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-col"><div class="step-num">4</div><div class="step-connector"></div></div>
+            <div class="step-content">
+              <strong>Check the dashboard for the broader picture</strong>
+              <span>dashboard/index.html gives you a visual summary. Click into any chart segment for the underlying issues.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">CLOSING AN ISSUE</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+          <div style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem;color:#888">
+            <strong style="color:var(--text);display:block;margin-bottom:4px">When the incident is resolved</strong>
+            Close the GitHub Issue manually. Leave a comment with the resolution. The agent will not re-open it.
+          </div>
+          <div style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem;color:#888">
+            <strong style="color:var(--text);display:block;margin-bottom:4px">When the compliance violation is remediated</strong>
+            Close the compliance issue and note the contract version that was updated. Legal team should confirm.
+          </div>
+          <div style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:2px;font-size:0.84rem;color:#888">
+            <strong style="color:var(--text);display:block;margin-bottom:4px">When the severity is wrong</strong>
+            Edit the title, leave a comment. The agent reads its own PROD-ID to dedup — your title edit won't be overwritten.
+          </div>
+        </div>
+
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">WHAT THE AGENT DOES NOT DO</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:12px;font-size:0.84rem;color:#888;align-items:flex-start">
+            <span style="color:var(--p0);flex-shrink:0">✗</span>Page on-call directly (coming next — needs webhook)
+          </div>
+          <div style="display:flex;gap:12px;font-size:0.84rem;color:#888;align-items:flex-start">
+            <span style="color:var(--p0);flex-shrink:0">✗</span>Close resolved issues — you do that
+          </div>
+          <div style="display:flex;gap:12px;font-size:0.84rem;color:#888;align-items:flex-start">
+            <span style="color:var(--p0);flex-shrink:0">✗</span>Diagnose issues without a matching runbook — it flags them as novel
+          </div>
+          <div style="display:flex;gap:12px;font-size:0.84rem;color:#888;align-items:flex-start">
+            <span style="color:var(--p0);flex-shrink:0">✗</span>Execute rollbacks — it recommends, you action
+          </div>
+          <div style="display:flex;gap:12px;font-size:0.84rem;color:#888;align-items:flex-start">
+            <span style="color:var(--p0);flex-shrink:0">✗</span>Read live monitoring systems — it reads the repo only
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: FEEDBACK AND IMPROVEMENT -->
+  <div class="slide" data-title="Feedback">
+    <div class="eyebrow">Making It Better — Your Input Matters</div>
+    <div class="headline h2">The agent learns from your feedback</div>
+
+    <div class="cols cols-2" style="margin-top:20px;max-width:1100px;gap:36px;align-items:start">
+      <div>
+        <p class="body-text" style="margin-bottom:20px">The agent's behaviour is defined in CLAUDE.md — a plain text file committed to the repo. Every time the ops team sees a wrong severity, a missed correlation, or a runbook that's out of date, that's a signal we can act on.</p>
+
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:1.3rem;flex-shrink:0">📖</span>
+              <div>
+                <h3 style="font-size:0.9rem;margin-bottom:6px">Wrong runbook match?</h3>
+                <p>Tell us the PROD-ID and which runbook should have matched. We'll update the keyword table in CLAUDE.md.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px;--accent:var(--correlation)">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:1.3rem;flex-shrink:0">🔗</span>
+              <div>
+                <h3 style="font-size:0.9rem;margin-bottom:6px;color:var(--correlation)">Missed a correlation?</h3>
+                <p>If the agent didn't link an incident to a deploy that you knew was the cause, let us know the PROD-ID and deploy. We'll check if the timestamp window needs widening or the service-area matching needs updating.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px;--accent:var(--compliance)">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:1.3rem;flex-shrink:0">⚖️</span>
+              <div>
+                <h3 style="font-size:0.9rem;margin-bottom:6px;color:var(--compliance)">New compliance rule?</h3>
+                <p>If legal adds a new policy requirement, it gets appended to compliance-policy.md. The agent picks it up on the next run automatically — no code change needed.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px;--accent:var(--muted)">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:1.3rem;flex-shrink:0">📌</span>
+              <div>
+                <h3 style="font-size:0.9rem;margin-bottom:6px;color:#666">New runbook?</h3>
+                <p>Add a markdown file to runbooks/ and add keyword entries to the Task 1 section of CLAUDE.md. The agent will match against it from the next run.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:14px">QUICK REFERENCE</div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:3px;padding:20px;font-family:'Share Tech Mono',monospace;font-size:0.75rem;line-height:2;color:#666">
+          <div><span style="color:var(--muted)">Dashboard URL</span><br><span style="color:#999">dashboard/index.html (open locally)</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">GitHub Issues filter</span><br><span style="color:#999">label:ops-agent is:open</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Agent runs</span><br><span style="color:#999">00:17 · 04:17 · 08:17 · 12:17 · 16:17 · 20:17 UTC</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Agent protocol lives in</span><br><span style="color:#999">CLAUDE.md (root of repo)</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Compliance policy lives in</span><br><span style="color:#999">compliance-policy.md (root of repo)</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Runbooks live in</span><br><span style="color:#999">runbooks/ (add new ones here)</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Cron TTL</span><br><span style="color:var(--orange)">7 days — renew before expiry</span></div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">Feedback / questions</span><br><span style="color:#999">Open a GitHub Issue or PR against CLAUDE.md</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+  const dotNav = document.getElementById('dotNav');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.title = slides[i].dataset.title || '';
+    d.onclick = () => goTo(i);
+    dotNav.appendChild(d);
+  });
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotNav.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(n, total - 1));
+    slides[cur].classList.add('active');
+    dotNav.children[cur].classList.add('active');
+    document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total - 1;
+    document.getElementById('progressBar').style.width = `${((cur + 1) / total) * 100}%`;
+  }
+  function go(dir) { goTo(cur + dir); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+  goTo(0);
+</script>
+</body>
+</html>

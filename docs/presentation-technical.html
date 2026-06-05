@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Always-On Agent — Engineering Deep Dive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFE300;
+      --bg: #080808;
+      --card: #101010;
+      --border: rgba(255,227,0,0.15);
+      --text: #d8d8d8;
+      --muted: #555;
+      --triage: #FF6B35;
+      --correlation: #29B6F6;
+      --compliance: #BA68C8;
+      --p0: #FF1744;
+      --green: #00E676;
+      --code-bg: #050505;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+
+    .deck { width: 100%; height: 100%; position: relative; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 72px 80px 60px; opacity: 0; pointer-events: none; transform: translateY(20px); transition: opacity .4s ease, transform .4s ease; overflow-y: auto; }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+    .chrome { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; border-bottom: 1px solid var(--border); background: rgba(8,8,8,0.96); backdrop-filter: blur(8px); z-index: 100; }
+    .chrome-logo { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 3px; color: var(--muted); }
+    .chrome-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; color: var(--green); border: 1px solid rgba(0,230,118,0.3); padding: 3px 10px; border-radius: 2px; }
+    .chrome-nav { display: flex; align-items: center; gap: 10px; }
+    .nav-btn { background: none; border: 1px solid var(--border); color: var(--muted); width: 32px; height: 32px; border-radius: 2px; cursor: pointer; font-size: 1rem; transition: border-color .15s, color .15s; display: flex; align-items: center; justify-content: center; }
+    .nav-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+    .nav-btn:disabled { opacity: 0.2; cursor: default; }
+    .slide-counter { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); min-width: 60px; text-align: center; letter-spacing: 2px; }
+    .progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--green); box-shadow: 0 0 10px rgba(0,230,118,0.5); transition: width .4s ease; z-index: 101; }
+    .dot-nav { position: fixed; right: 24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--muted); cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+    .dot.active { background: var(--green); border-color: var(--green); transform: scale(1.6); }
+
+    /* typography */
+    .eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .headline { font-family: 'Bebas Neue', cursive; letter-spacing: 4px; line-height: 1.05; }
+    .h1 { font-size: clamp(2rem, 4vw, 3.6rem); color: var(--yellow); }
+    .h2 { font-size: clamp(1.6rem, 3vw, 2.6rem); color: var(--green); }
+    .body-text { font-size: clamp(0.88rem, 1.4vw, 1.05rem); line-height: 1.65; color: #999; max-width: 780px; }
+
+    /* code blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid rgba(0,230,118,0.12);
+      border-left: 3px solid var(--green);
+      border-radius: 3px;
+      padding: 16px 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #aaa;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .kw  { color: var(--green); }
+    .str { color: #FFE300; }
+    .cmt { color: #444; font-style: italic; }
+    .num { color: var(--correlation); }
+
+    /* layout */
+    .cols { display: grid; gap: 24px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .cols-code { grid-template-columns: 1fr 1.2fr; }
+
+    /* cards */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 3px; padding: 20px 22px; position: relative; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent, var(--green)); border-radius: 3px 0 0 3px; }
+    .card h3 { font-family: 'Bebas Neue', cursive; font-size: 1.1rem; letter-spacing: 3px; color: var(--accent, var(--green)); margin-bottom: 8px; }
+    .card p { font-size: 0.85rem; line-height: 1.6; color: #777; }
+    .card .tag { font-family: 'Share Tech Mono', monospace; font-size: 0.58rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
+
+    /* arch diagram */
+    .arch { display: flex; flex-direction: column; gap: 6px; }
+    .arch-row { display: flex; align-items: stretch; gap: 6px; }
+    .arch-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 10px 14px; font-size: 0.8rem; }
+    .arch-box .ab-label { font-family: 'Bebas Neue', cursive; font-size: 0.8rem; letter-spacing: 3px; color: var(--accent, var(--green)); margin-bottom: 4px; }
+    .arch-box .ab-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+    .arch-arrow { display: flex; align-items: center; justify-content: center; color: rgba(0,230,118,0.3); font-size: 1rem; flex-shrink: 0; width: 20px; }
+
+    /* decision table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); font-weight: 400; }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #999; vertical-align: top; line-height: 1.5; }
+    tr:hover td { background: rgba(255,227,0,0.02); }
+    .check { color: var(--green); }
+    .cross { color: var(--p0); }
+
+    /* tradeoff list */
+    .tradeoff { display: flex; flex-direction: column; gap: 10px; }
+    .tradeoff-item { display: grid; grid-template-columns: 90px 1fr; gap: 14px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 2px; font-size: 0.84rem; }
+    .tradeoff-item .tl { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 2px; align-self: center; }
+    .tradeoff-item.pro .tl { color: var(--green); }
+    .tradeoff-item.con .tl { color: var(--p0); }
+    .tradeoff-item .td { color: #888; line-height: 1.5; }
+
+    /* flow */
+    .flow { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; }
+    .flow-step { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 14px 12px; text-align: center; }
+    .flow-step .fs-icon { font-size: 1.3rem; margin-bottom: 6px; }
+    .flow-step .fs-label { font-family: 'Bebas Neue', cursive; font-size: 0.78rem; letter-spacing: 3px; color: var(--green); margin-bottom: 3px; }
+    .flow-step .fs-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+    .flow-arrow { flex-shrink: 0; width: 22px; text-align: center; color: rgba(0,230,118,0.35); font-size: 0.9rem; }
+
+    /* open questions */
+    .q-list { display: flex; flex-direction: column; gap: 12px; max-width: 900px; }
+    .q-item { display: grid; grid-template-columns: 28px 1fr; gap: 14px; padding: 14px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 2px; align-items: start; }
+    .q-item .q-num { font-family: 'Bebas Neue', cursive; font-size: 1.4rem; color: var(--green); opacity: 0.4; line-height: 1; margin-top: 2px; }
+    .q-item strong { display: block; font-size: 0.9rem; color: var(--text); margin-bottom: 4px; }
+    .q-item span { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="chrome">
+  <span class="chrome-logo">ALWAYS-ON OPS AGENT — ENGINEERING DEEP DIVE</span>
+  <span class="chrome-tag">INTERNAL // TECHNICAL</span>
+  <div class="chrome-nav">
+    <button class="nav-btn" id="prevBtn" onclick="go(-1)">&#8592;</button>
+    <span class="slide-counter" id="counter">1 / 8</span>
+    <button class="nav-btn" id="nextBtn" onclick="go(1)">&#8594;</button>
+  </div>
+</div>
+
+<div class="dot-nav" id="dotNav"></div>
+
+<div class="deck">
+
+  <!-- SLIDE 1: WHAT WE BUILT AND WHY -->
+  <div class="slide active" data-title="Overview">
+    <div class="eyebrow">Internal Engineering Brief — Always-On Ops Agent</div>
+    <div class="headline h1">What we built,<br>how it works,<br>what to know before you extend it</div>
+    <div style="margin-top:24px;max-width:720px">
+      <p class="body-text">This is not a demo. This is the actual system, in production, running every 4 hours. This deck covers the architecture decisions, the constraints, the tradeoffs we made, and the known rough edges — so you can extend it without breaking it.</p>
+    </div>
+    <div style="margin-top:32px;display:flex;gap:24px;flex-wrap:wrap">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:2">
+        REPO<br>RUNTIME<br>SCHEDULE<br>OUTPUT<br>PERSISTENCE
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#777;line-height:2">
+        ruscoe888/always-on-agent<br>
+        Claude Code durable cron (CronCreate)<br>
+        Every 4h at :17 — off-peak to reduce fleet contention<br>
+        GitHub Issues via gh CLI<br>
+        .claude/scheduled_tasks.json — 7-day TTL, must renew
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: ARCHITECTURE -->
+  <div class="slide" data-title="Architecture">
+    <div class="eyebrow">Architecture</div>
+    <div class="headline h2">Two-layer design: cron prompt + CLAUDE.md</div>
+
+    <div style="margin-top:20px;max-width:960px">
+      <p class="body-text" style="margin-bottom:20px">The key decision was to keep the cron prompt minimal (~150 words) and push all domain logic into <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">CLAUDE.md</code>. Claude Code reads CLAUDE.md automatically when it enters the repo directory — so the agent inherits the full protocol without the cron prompt growing unbounded.</p>
+
+      <div class="arch" style="max-width:900px">
+        <div class="arch-row">
+          <div class="arch-box" style="--accent:var(--yellow);border-color:rgba(255,227,0,0.2)">
+            <div class="ab-label" style="color:var(--yellow)">CronCreate (durable)</div>
+            <div class="ab-desc">~150-word prompt. Fires every 4h. Tells Claude to cd into the repo, git pull, and follow CLAUDE.md. Nothing else. Lives in .claude/scheduled_tasks.json.</div>
+          </div>
+        </div>
+        <div style="text-align:center;color:rgba(0,230,118,0.3);font-size:1rem;margin:4px 0">↓ triggers</div>
+        <div class="arch-row">
+          <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
+            <div class="ab-label">git -C /repo pull origin main</div>
+            <div class="ab-desc">Fetches latest data. The repo is the single source of truth — issues, deploys, runbooks, contracts all live here.</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
+            <div class="ab-label">CLAUDE.md loaded</div>
+            <div class="ab-desc">Auto-loaded by Claude Code. Contains: severity rubric, runbook matching keywords, deploy correlation logic, compliance rule set, dedup query, output format.</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
+            <div class="ab-label">gh issue list (dedup)</div>
+            <div class="ab-desc">Queries existing ops-agent issues before creating. Matches by PROD-XXXX ID (triage/correlation) or contract+rule string (compliance). Skips dupes.</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box" style="border-color:rgba(0,230,118,0.2)">
+            <div class="ab-label">gh issue create (×N)</div>
+            <div class="ab-desc">One issue per net-new finding. Labels: ops-agent + task-specific. Structured body with source file references.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:14px 18px;background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.12);border-radius:2px;font-size:0.82rem;color:#777">
+        <strong style="color:var(--green)">Why not a single monolithic prompt?</strong> — Cron prompts are string literals. A 2000-word prompt is fragile, unversioned, and can't be reviewed in a PR. CLAUDE.md is versioned in git, diffable, and Claude reads it natively. Changing agent behaviour = commit to CLAUDE.md = reviewed change.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: PERMISSIONS MODEL -->
+  <div class="slide" data-title="Permissions">
+    <div class="eyebrow">Permissions Model</div>
+    <div class="headline h2">Why the agent ran without prompting</div>
+
+    <div class="cols cols-code" style="margin-top:20px;max-width:1100px;gap:28px">
+      <div>
+        <p class="body-text" style="margin-bottom:16px">Claude Code prompts for any Bash command not in an explicit allowlist. In an unattended cron run, a prompt = a hang. We solved this at two layers:</p>
+
+        <div class="tradeoff" style="margin-bottom:16px">
+          <div class="tradeoff-item pro">
+            <div class="tl">GLOBAL</div>
+            <div class="td"><strong style="color:var(--text)">~/.claude/settings.json</strong> — allows git pull, gh issue *, gh label *, gh api, cat, ls, find, echo. Applies to all Claude Code sessions on this machine including cron runs.</div>
+          </div>
+          <div class="tradeoff-item pro">
+            <div class="tl">PROJECT</div>
+            <div class="td"><strong style="color:var(--text)">.claude/settings.json</strong> (committed to repo) — mirrors the same allowlist. Provides a fallback and documents what the agent needs if run on a different machine.</div>
+          </div>
+          <div class="tradeoff-item con">
+            <div class="tl">GAP</div>
+            <div class="td">The Read tool is not Bash — it doesn't need allowlisting. But any <em>novel</em> Bash pattern not in the allowlist will still prompt. If you add new shell commands to CLAUDE.md, add them to the allowlist first.</div>
+          </div>
+        </div>
+
+        <div style="padding:12px 16px;background:rgba(255,23,68,0.04);border:1px solid rgba(255,23,68,0.15);border-radius:2px;font-size:0.8rem;color:#888">
+          <strong style="color:var(--p0)">Security note:</strong> The allowlist uses prefix matching — <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">Bash(gh issue create*)</code> allows any gh issue create invocation. If the agent ever reads untrusted data that could influence its tool calls, this is a prompt injection surface. The current data (JSON/markdown in a controlled repo) is low-risk.
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">~/.claude/settings.json</div>
+        <pre><span class="cmt">// Global — applies to all sessions, including cron</span>
+{
+  <span class="str">"permissions"</span>: {
+    <span class="str">"allow"</span>: [
+      <span class="str">"Bash(git pull*)"</span>,
+      <span class="str">"Bash(git -C * pull*)"</span>,
+      <span class="str">"Bash(gh issue list*)"</span>,
+      <span class="str">"Bash(gh issue create*)"</span>,
+      <span class="str">"Bash(gh label list*)"</span>,
+      <span class="str">"Bash(gh label create*)"</span>,
+      <span class="str">"Bash(gh api*)"</span>,
+      <span class="str">"Bash(cat *)"</span>,
+      <span class="str">"Bash(ls *)"</span>,
+      <span class="str">"Bash(find *)"</span>,
+      <span class="str">"Bash(echo *)"</span>
+    ]
+  }
+}</pre>
+
+        <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">.claude/settings.json (in repo)</div>
+        <pre><span class="cmt">// Project-level — same allowlist, committed for portability</span>
+{
+  <span class="str">"permissions"</span>: {
+    <span class="str">"allow"</span>: [
+      <span class="str">"Bash(git pull*)"</span>,
+      <span class="str">"Bash(git -C * pull*)"</span>,
+      <span class="str">"Bash(gh issue list*)"</span>,
+      <span class="str">"Bash(gh issue create*)"</span>,  <span class="cmt">// ...</span>
+    ]
+  }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: THE CLAUDE.MD CONTRACT -->
+  <div class="slide" data-title="CLAUDE.md">
+    <div class="eyebrow">The Agent Contract</div>
+    <div class="headline h2">CLAUDE.md is the source of truth</div>
+
+    <div class="cols cols-code" style="margin-top:20px;max-width:1100px;gap:28px">
+      <div>
+        <p class="body-text" style="margin-bottom:16px">CLAUDE.md defines the agent's behaviour. It is loaded automatically by Claude Code before any run. Think of it as a system prompt that lives in version control.</p>
+
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <div class="card" style="padding:14px 18px">
+            <div class="tag">SECTION 1</div>
+            <h3 style="font-size:0.9rem">Ops Triage Protocol</h3>
+            <p>Severity rubric (P0–P3), runbook keyword matching, on-call routing. Deterministic — same input always produces the same severity label.</p>
+          </div>
+          <div class="card" style="padding:14px 18px;--accent:var(--correlation)">
+            <div class="tag">SECTION 2</div>
+            <h3 style="font-size:0.9rem;color:var(--correlation)">Incident Correlation</h3>
+            <p>48-hour window, service-area matching, causal chain detection. Relies on ISO 8601 timestamps in issues/ and deploys/recent.json.</p>
+          </div>
+          <div class="card" style="padding:14px 18px;--accent:var(--compliance)">
+            <div class="tag">SECTION 3</div>
+            <h3 style="font-size:0.9rem;color:var(--compliance)">Compliance Audit</h3>
+            <p>7-rule policy check per contract. References compliance-policy.md at runtime — policy changes in that file are reflected immediately on the next run.</p>
+          </div>
+          <div class="card" style="padding:14px 18px;--accent:var(--muted)">
+            <div class="tag">SECTION 4</div>
+            <h3 style="font-size:0.9rem;color:#777">Deduplication + Output</h3>
+            <p>Issue title format, label schema, dedup query logic, and run summary format. Deterministic enough to be tested manually.</p>
+          </div>
+        </div>
+
+        <div style="padding:12px 16px;background:rgba(255,227,0,0.03);border:1px solid rgba(255,227,0,0.12);border-radius:2px;font-size:0.8rem;color:#777">
+          <strong style="color:var(--yellow)">Extending the agent:</strong> Add a new runbook? Update the keyword table in Section 1. New compliance rule? Append to compliance-policy.md and add the check to Section 3. New output channel (Slack, PagerDuty)? Add a new section to CLAUDE.md with the relevant Bash commands — then allowlist them.
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">CLAUDE.md — severity rubric excerpt</div>
+        <pre><span class="kw">## Task 1: Ops Triage</span>
+
+Assign severity using this rubric:
+- <span class="str">P0</span>: Multiple customers affected,
+       revenue impact, active outage
+- <span class="str">P1</span>: Single enterprise customer affected,
+       or service degraded
+- <span class="str">P2</span>: Intermittent, workaround available,
+       limited user impact
+- <span class="str">P3</span>: Feature requests, non-urgent
+
+Runbook keyword matching:
+- auth-502-windows.md
+  → <span class="num">502</span>, login, auth, connection pool
+- cdn-upload-latency.md
+  → upload, CDN, slow, latency, image
+- payment-service-degraded.md
+  → PaymentService, checkout, NPE
+
+<span class="kw">## Deduplication</span>
+
+Before creating ANY issue, run:
+
+  gh issue list \
+    --repo ruscoe888/always-on-agent \
+    --label ops-agent \
+    --state all --limit <span class="num">200</span>
+
+If title already contains PROD-XXXX
+with same type tag → SKIP.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: DATA SCHEMA -->
+  <div class="slide" data-title="Data Schema">
+    <div class="eyebrow">Data Layer</div>
+    <div class="headline h2">What the agent reads — and what it expects</div>
+
+    <div class="cols cols-3" style="margin-top:20px;max-width:1100px;gap:16px">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">issues/PROD-XXXX.json</div>
+        <pre style="font-size:0.72rem">{
+  <span class="str">"id"</span>: <span class="str">"PROD-4521"</span>,
+  <span class="str">"title"</span>: <span class="str">"..."</span>,
+  <span class="str">"status"</span>: <span class="str">"open"</span>,
+  <span class="str">"severity"</span>: <span class="kw">null</span>,   <span class="cmt">← agent fills</span>
+  <span class="str">"labels"</span>: [],
+  <span class="str">"assignee"</span>: <span class="kw">null</span>, <span class="cmt">← agent fills</span>
+  <span class="str">"opened_at"</span>: <span class="str">"ISO8601"</span>,
+  <span class="str">"reporter"</span>: <span class="str">"email"</span>,
+  <span class="str">"body"</span>: <span class="str">"..."</span>,
+  <span class="str">"comments"</span>: []
+}</pre>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.6">
+          Critical field: <code style="font-family:'Share Tech Mono',monospace;color:var(--green)">opened_at</code> — used for the 48h correlation window. Must be ISO 8601. Missing or malformed timestamps will silently break correlation.
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">deploys/recent.json</div>
+        <pre style="font-size:0.72rem">{
+  <span class="str">"deploys"</span>: [{
+    <span class="str">"service"</span>: <span class="str">"payment-service"</span>,
+    <span class="str">"version"</span>: <span class="str">"v4.8.2"</span>,
+    <span class="str">"deployed_at"</span>: <span class="str">"ISO8601"</span>,
+    <span class="str">"deployed_by"</span>: <span class="str">"email"</span>,
+    <span class="str">"commit"</span>: <span class="str">"9f4a1c8"</span>,
+    <span class="str">"summary"</span>: <span class="str">"..."</span>,
+    <span class="str">"files_changed"</span>: [<span class="str">"..."</span>],
+    <span class="str">"rollback_available"</span>: <span class="kw">true</span>,
+    <span class="str">"last_known_good"</span>: <span class="str">"v4.8.1"</span>
+  }]
+}</pre>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.6">
+          This is manually maintained today. The natural next step is a CI/CD pipeline that appends to this file on every deploy — making correlation fully automated end-to-end.
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-bottom:10px">contracts/ + compliance-policy.md</div>
+        <pre style="font-size:0.72rem"><span class="cmt"># compliance-policy.md</span>
+<span class="kw">## Data residency</span>
+EU data must stay in EU.
+Silence = violation.
+
+<span class="kw">## Audit rights</span>
+≤30 days notice. ≥1x per year.
+
+<span class="kw">## Termination</span>
+≤90 days notice for convenience.
+
+<span class="kw">## Liability cap</span>
+≥12 months. Breach not excluded.
+
+<span class="kw">## Subprocessors</span>
+≥30 days PRIOR written notice.
+
+<span class="kw">## Breach notification</span>
+≤72 hours from detection.
+
+<span class="kw">## Governing law</span>
+Mature data protection jurisdiction.</pre>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.6">
+          The agent reads this file at runtime on every run. Updating the policy requires only a commit — no changes to CLAUDE.md or the cron.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: TRADEOFFS -->
+  <div class="slide" data-title="Tradeoffs">
+    <div class="eyebrow">Design Decisions — Honest Assessment</div>
+    <div class="headline h2">What we chose and what we gave up</div>
+
+    <div style="margin-top:20px;max-width:1000px">
+      <table>
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>What we chose</th>
+            <th>Alternative considered</th>
+            <th>Why we chose this</th>
+            <th>What we gave up</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Runtime</td>
+            <td>Claude Code durable cron</td>
+            <td>GitHub Actions scheduled workflow</td>
+            <td>Zero infra, zero YAML, runs in existing Claude Code session</td>
+            <td>7-day TTL — must renew. Requires Claude Code running on a machine.</td>
+          </tr>
+          <tr>
+            <td>Output</td>
+            <td>GitHub Issues via gh CLI</td>
+            <td>Commit markdown reports to repo</td>
+            <td>Issues are actionable, assignable, and closeable — reports are static</td>
+            <td>Issues accumulate indefinitely. No auto-close on resolution.</td>
+          </tr>
+          <tr>
+            <td>Domain logic location</td>
+            <td>CLAUDE.md in repo</td>
+            <td>Embedded in cron prompt</td>
+            <td>Versioned, reviewable, auto-loaded by Claude Code</td>
+            <td>Agent must cd into the correct directory to pick it up</td>
+          </tr>
+          <tr>
+            <td>Deduplication</td>
+            <td>gh issue list title-match</td>
+            <td>Local state file / database</td>
+            <td>No external state — GitHub is the source of truth</td>
+            <td>Linear scan — slow at >200 issues. PROD-ID matching is substring, not exact.</td>
+          </tr>
+          <tr>
+            <td>Deploy data</td>
+            <td>Manual JSON file</td>
+            <td>Live CI/CD API query</td>
+            <td>No auth tokens needed in the agent. Simple to demo.</td>
+            <td>Stale if deploys aren't manually appended. Not production-ready as-is.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: KNOWN GAPS + HOW TO EXTEND -->
+  <div class="slide" data-title="Extension Points">
+    <div class="eyebrow">Known Gaps and Extension Points</div>
+    <div class="headline h2">What to build next</div>
+
+    <div class="cols cols-2" style="margin-top:20px;max-width:1100px;gap:24px">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--p0);margin-bottom:12px">KNOWN GAPS</div>
+        <div class="q-list">
+          <div class="q-item">
+            <div class="q-num">1</div>
+            <div>
+              <strong>7-day cron TTL</strong>
+              <span>The durable cron auto-expires. Currently requires manual re-creation. Fix: promote to a GitHub Action on a schedule, or add a self-renewal cron that recreates itself before expiry.</span>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num">2</div>
+            <div>
+              <strong>Deploy data is manual</strong>
+              <span>deploys/recent.json is hand-maintained. Should be appended by CI/CD on every deploy — a post-deploy GitHub Action step writing a JSON entry is the natural hook.</span>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num">3</div>
+            <div>
+              <strong>Dedup degrades at scale</strong>
+              <span>gh issue list --limit 200 is fine now. Beyond 200 issues, matches will be missed and duplicates filed. Add pagination or a state file if volume grows.</span>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num">4</div>
+            <div>
+              <strong>No P0 escalation path</strong>
+              <span>Agent files a GitHub Issue for a P0. That's it. A P0 needs a Slack or PagerDuty call. Add a Bash command to CLAUDE.md + an allowlist entry for curl to a webhook.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--green);margin-bottom:12px">EXTENSION POINTS</div>
+        <div class="q-list">
+          <div class="q-item" style="border-color:rgba(0,230,118,0.15)">
+            <div class="q-num" style="color:var(--green)">A</div>
+            <div>
+              <strong>New runbooks</strong>
+              <span>Add markdown to runbooks/. Add keyword entries to the Task 1 section of CLAUDE.md. No other changes needed.</span>
+            </div>
+          </div>
+          <div class="q-item" style="border-color:rgba(0,230,118,0.15)">
+            <div class="q-num" style="color:var(--green)">B</div>
+            <div>
+              <strong>New compliance rules</strong>
+              <span>Append to compliance-policy.md. Add the check to Task 3 in CLAUDE.md. The agent picks it up on the next run.</span>
+            </div>
+          </div>
+          <div class="q-item" style="border-color:rgba(0,230,118,0.15)">
+            <div class="q-num" style="color:var(--green)">C</div>
+            <div>
+              <strong>New output channels</strong>
+              <span>Add a Task 4 to CLAUDE.md with the channel logic (Slack webhook, PagerDuty API, Jira ticket). Allowlist the new Bash commands globally.</span>
+            </div>
+          </div>
+          <div class="q-item" style="border-color:rgba(0,230,118,0.15)">
+            <div class="q-num" style="color:var(--green)">D</div>
+            <div>
+              <strong>Real-time trigger</strong>
+              <span>The 4h cron is a polling model. For sub-hour response, wire a GitHub webhook on issue creation to trigger the agent immediately via gh workflow dispatch or a Claude Code API call.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: OPEN QUESTIONS -->
+  <div class="slide" data-title="Open Questions">
+    <div class="eyebrow">For Discussion</div>
+    <div class="headline h2">Open questions for the team</div>
+
+    <div class="q-list" style="margin-top:24px;max-width:900px">
+      <div class="q-item">
+        <div class="q-num">1</div>
+        <div>
+          <strong>Who owns CLAUDE.md?</strong>
+          <span>It's a committed file — any engineer can PR a change. But unreviewed changes to the severity rubric or dedup logic could cause the agent to mis-triage or create duplicates. Should it require a designated reviewer?</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">2</div>
+        <div>
+          <strong>Where should the cron live long-term?</strong>
+          <span>Currently tied to one machine running Claude Code. For production reliability, should this be a GitHub Actions workflow, a Lambda, or a managed Claude API scheduled invocation? Each has different auth and cost profiles.</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">3</div>
+        <div>
+          <strong>How do we validate agent output quality?</strong>
+          <span>The agent's severity assignments and correlations are LLM outputs — plausible but not guaranteed correct. Should there be a human review gate before P0 issues page on-call? Or do we trust the rubric?</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">4</div>
+        <div>
+          <strong>Is the prompt injection surface acceptable?</strong>
+          <span>The agent reads issue bodies from a controlled repo. If anyone can write to that repo, they can craft an issue body that attempts to manipulate the agent's tool calls. Access controls on the repo are the current mitigation.</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">5</div>
+        <div>
+          <strong>What's the rollback story?</strong>
+          <span>If the agent files 50 incorrect issues due to a bad CLAUDE.md change, there's no bulk-close command. Should we add a cleanup script to the repo? Or is closing via gh issue list --label ops-agent sufficient?</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+  const dotNav = document.getElementById('dotNav');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.title = slides[i].dataset.title || '';
+    d.onclick = () => goTo(i);
+    dotNav.appendChild(d);
+  });
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotNav.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(n, total - 1));
+    slides[cur].classList.add('active');
+    dotNav.children[cur].classList.add('active');
+    document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total - 1;
+    document.getElementById('progressBar').style.width = `${((cur + 1) / total) * 100}%`;
+  }
+  function go(dir) { goTo(cur + dir); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+  goTo(0);
+</script>
+</body>
+</html>
