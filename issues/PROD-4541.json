@@ -1,0 +1,12 @@
+{
+  "id": "PROD-4541",
+  "title": "Webhook delivery failures spiking — third-party integrations not receiving events",
+  "status": "open",
+  "severity": null,
+  "labels": ["customer-impact", "integrations"],
+  "assignee": null,
+  "opened_at": "2026-06-05T14:22:08Z",
+  "reporter": "monitoring-alerts@bts-synthetic.example",
+  "body": "Webhook delivery success rate has dropped from 99.2% to 61.4% over the last 40 minutes. Affected customers are reporting missing order confirmation events, inventory sync failures, and CRM update gaps. Error breakdown from delivery logs: 38% connection timeout, 44% 503 from downstream, 18% TLS handshake failure. All failures are on outbound webhooks — inbound API traffic is unaffected. Impacted customers include Initech (order pipeline), Vandelay Industries (inventory sync), and Umbrella Ltd (CRM integration). Internal webhook retry queue is backing up — currently 14,200 undelivered events.",
+  "comments": []
+}

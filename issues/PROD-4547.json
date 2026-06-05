@@ -1,0 +1,12 @@
+{
+  "id": "PROD-4547",
+  "title": "Email notification service sending duplicate messages to users",
+  "status": "open",
+  "severity": null,
+  "labels": ["notifications", "customer-impact"],
+  "assignee": null,
+  "opened_at": "2026-06-05T11:38:55Z",
+  "reporter": "customer-success@bts-synthetic.example",
+  "body": "Users are receiving between 2 and 6 duplicate copies of transactional emails — order confirmations, password resets, and shipping notifications. Started approximately 09:15 UTC. Complaint volume in support is high: 47 tickets opened in the last 2 hours. One enterprise customer (Acme Corp) has reported that their users received 6 copies of a password reset email, causing confusion and account lockouts from multiple simultaneous reset attempts. Root cause suspected in the notification-service message deduplication layer — the dedup key TTL may have been reduced or cleared. No visible errors in the notification-service logs, but message queue consumer count increased from 4 to 12 workers following a config change at 09:10 UTC.",
+  "comments": []
+}

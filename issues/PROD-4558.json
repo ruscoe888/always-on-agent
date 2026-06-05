@@ -1,0 +1,12 @@
+{
+  "id": "PROD-4558",
+  "title": "Data export jobs timing out for large accounts — exports silently failing",
+  "status": "open",
+  "severity": null,
+  "labels": ["data", "exports"],
+  "assignee": null,
+  "opened_at": "2026-06-05T08:05:12Z",
+  "reporter": "customer-success@bts-synthetic.example",
+  "body": "Enterprise customers with datasets over 500,000 records are reporting that scheduled data exports are not arriving. Exports appear to start (status shows 'processing') but never complete — jobs are silently timing out after the 10-minute worker timeout with no error email sent to the customer. Affected: Globex Corp (monthly billing export, 1.2M records), Initech (compliance data extract, 890K records), and Umbrella Ltd (audit log export, 2.4M records). All three have missed contractual SLA windows for data delivery. The export-worker service logs show jobs starting but no completion or failure events. Memory usage on export workers climbed steadily from 2.1GB to the 4GB container limit before the process is killed. Suspected memory leak introduced in the last export-worker deployment, or a missing pagination on a new data join added to the export query.",
+  "comments": []
+}

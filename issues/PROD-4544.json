@@ -1,0 +1,12 @@
+{
+  "id": "PROD-4544",
+  "title": "Search returning stale results — index lag exceeding 45 minutes",
+  "status": "open",
+  "severity": null,
+  "labels": ["search", "data"],
+  "assignee": null,
+  "opened_at": "2026-06-05T15:09:47Z",
+  "reporter": "customer-support@bts-synthetic.example",
+  "body": "Multiple customers reporting that newly created records are not appearing in search results. Investigation shows the Elasticsearch index is lagging 47 minutes behind the primary database. Normal lag is under 30 seconds. The indexing pipeline (search-indexer service) is running but processing rate has dropped from ~3,200 docs/min to ~190 docs/min. No errors in the indexer logs — it appears to be processing slowly rather than failing. Backlog has accumulated 2.1 million unindexed documents. Customers affected: search on the product catalogue, customer lookup, and order history are all impacted. Workaround: direct DB queries still return current data but are not exposed via the public API.",
+  "comments": []
+}
