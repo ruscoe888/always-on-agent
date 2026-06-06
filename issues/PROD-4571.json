@@ -1,0 +1,15 @@
+{
+  "id": "PROD-4571",
+  "title": "Database replication lag on audit-db \u2014 265s behind primary",
+  "status": "open",
+  "severity": null,
+  "labels": [
+    "data",
+    "infrastructure"
+  ],
+  "assignee": null,
+  "opened_at": "2026-06-06T14:05:24Z",
+  "reporter": "platform-alerts@bts-synthetic.example",
+  "body": "Replication lag alert at 14:05 UTC. The audit-db read replica is 265 seconds behind the primary (normal: <4s). Read traffic routed to the replica is receiving stale data. Affected read paths: /v2/inventory, /v2/products. Primary write load has increased 96% in the last hour \u2014 suspected cause is a large batch job or unoptimised bulk update creating excessive WAL volume. If lag exceeds 600s the read replica will be taken offline automatically, routing all traffic to the primary \u2014 this will increase primary load significantly. Customers on the reporting dashboard (Soylent Corp, Bluth Company) are seeing data that is 265 seconds old.",
+  "comments": []
+}
