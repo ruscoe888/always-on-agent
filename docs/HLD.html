@@ -7,73 +7,99 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
-      --yellow:#FFE300; --bg:#080808; --card:#0f0f0f; --card2:#121212;
-      --border:rgba(255,227,0,0.15); --text:#d0d0d0; --muted:#555; --muted2:#888;
+      --yellow:#FFE300; --bg:#080808; --card:#0f0f0f; --card2:#111;
+      --border:rgba(255,227,0,0.14); --text:#d0d0d0; --muted:#555; --muted2:#888;
       --green:#00E676; --orange:#FF6B35; --blue:#29B6F6; --purple:#BA68C8; --red:#FF1744;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;line-height:1.6}
+    body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;line-height:1.7;font-size:16px}
     a{color:var(--yellow);text-decoration:none}
 
-    /* ── PAGE HEADER ── */
-    .page-header{padding:40px 60px 32px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,227,0,0.05) 0%,transparent 100%)}
-    .doc-type{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:5px;color:var(--muted);margin-bottom:10px}
-    .doc-title{font-family:'Bebas Neue',cursive;font-size:3rem;letter-spacing:6px;color:var(--yellow);line-height:1}
-    .doc-sub{font-size:1rem;color:var(--muted2);margin-top:8px;letter-spacing:2px}
-    .doc-meta{display:flex;gap:40px;margin-top:24px;flex-wrap:wrap}
-    .doc-meta-item{font-family:'Share Tech Mono',monospace;font-size:0.7rem;line-height:2}
-    .doc-meta-item .mk{color:var(--muted);letter-spacing:2px}
+    /* PAGE HEADER */
+    .page-header{padding:48px 72px 36px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,227,0,0.05) 0%,transparent 100%)}
+    .doc-eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:5px;color:var(--muted);margin-bottom:12px;text-transform:uppercase}
+    .doc-title{font-family:'Bebas Neue',cursive;font-size:3.2rem;letter-spacing:6px;color:var(--yellow);line-height:1}
+    .doc-sub{font-size:1.05rem;color:var(--muted2);margin-top:10px;letter-spacing:1px;max-width:720px}
+    .doc-meta{display:flex;gap:48px;margin-top:28px;flex-wrap:wrap;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05)}
+    .doc-meta-item{font-family:'Share Tech Mono',monospace;font-size:0.68rem;line-height:2.2}
+    .doc-meta-item .mk{color:var(--muted);letter-spacing:3px;text-transform:uppercase}
     .doc-meta-item .mv{color:var(--muted2)}
 
-    /* ── LAYOUT ── */
-    .page{max-width:1200px;margin:0 auto;padding:40px 60px 80px}
-    .section{margin-bottom:56px}
-    .section-label{font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-    .section-title{font-family:'Bebas Neue',cursive;font-size:1.8rem;letter-spacing:4px;color:var(--yellow);margin-bottom:20px;display:flex;align-items:center;gap:16px}
+    /* LAYOUT */
+    .page{max-width:1100px;margin:0 auto;padding:48px 72px 100px}
+    .section{margin-bottom:64px}
+    .section-eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+    .section-title{font-family:'Bebas Neue',cursive;font-size:2rem;letter-spacing:4px;color:var(--yellow);margin-bottom:24px;display:flex;align-items:center;gap:18px}
     .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-    p.body{font-size:0.95rem;color:var(--muted2);max-width:860px;margin-bottom:14px}
+    h3.sub{font-family:'Bebas Neue',cursive;font-size:1.15rem;letter-spacing:3px;color:var(--orange);margin:28px 0 12px}
+    p{font-size:0.97rem;color:var(--muted2);max-width:860px;margin-bottom:14px;line-height:1.75}
+    p strong{color:var(--text)}
 
-    /* ── DIAGRAM WRAPPER ── */
-    .diagram-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:24px;margin:24px 0;overflow-x:auto}
-    .diagram-caption{font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--muted);margin-top:14px}
+    /* CALLOUTS */
+    .callout{padding:18px 24px;border-radius:3px;margin:20px 0;font-size:0.92rem;line-height:1.7;max-width:860px}
+    .callout-yellow{background:rgba(255,227,0,0.04);border-left:4px solid var(--yellow);color:var(--muted2)}
+    .callout-yellow strong{color:var(--yellow)}
+    .callout-red{background:rgba(255,23,68,0.04);border-left:4px solid var(--red);color:var(--muted2)}
+    .callout-red strong{color:var(--red)}
+    .callout-green{background:rgba(0,230,118,0.04);border-left:4px solid var(--green);color:var(--muted2)}
+    .callout-green strong{color:var(--green)}
+    .callout-blue{background:rgba(41,182,246,0.04);border-left:4px solid var(--blue);color:var(--muted2)}
+    .callout-blue strong{color:var(--blue)}
 
-    /* ── TABLES ── */
-    table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:16px 0}
-    th{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);font-weight:400}
-    td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted2);vertical-align:top;line-height:1.5}
-    tr:hover td{background:rgba(255,227,0,0.015)}
+    /* DIAGRAM */
+    .diagram-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;margin:24px 0;overflow-x:auto}
+    .diagram-caption{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04)}
+
+    /* AGENT CARDS */
+    .agent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}
+    .agent-card{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:3px;padding:20px 22px;position:relative;overflow:hidden}
+    .agent-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--acc,var(--yellow))}
+    .agent-card .ac-num{font-family:'Bebas Neue',cursive;font-size:3.5rem;color:var(--acc,var(--yellow));opacity:0.06;position:absolute;bottom:-8px;right:12px;line-height:1}
+    .agent-card .ac-tag{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
+    .agent-card h4{font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;color:var(--acc,var(--yellow));margin-bottom:8px}
+    .agent-card p{font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0}
+    .agent-card.acc-yellow{--acc:var(--yellow)}
+    .agent-card.acc-orange{--acc:var(--orange)}
+    .agent-card.acc-blue  {--acc:var(--blue)}
+    .agent-card.acc-purple{--acc:var(--purple)}
+    .agent-card.acc-muted {--acc:var(--muted2)}
+
+    .phase-dot.dot-green{background:rgba(0,230,118,0.1);border-color:var(--green)}
+    .phase-dot.dot-muted{border-color:var(--muted)}
+
+    /* PROBLEM STATEMENT BOXES */
+    .problem-list{display:flex;flex-direction:column;gap:12px;max-width:860px;margin:16px 0}
+    .problem-item{display:grid;grid-template-columns:28px 1fr;gap:16px;padding:16px 20px;background:rgba(255,23,68,0.03);border:1px solid rgba(255,23,68,0.12);border-radius:3px;align-items:start}
+    .problem-item .pi-icon{font-size:1.1rem;margin-top:2px}
+    .problem-item .pi-text{font-size:0.9rem;color:var(--muted2);line-height:1.6}
+    .problem-item .pi-text strong{color:var(--text);display:block;margin-bottom:3px}
+
+    /* SOLUTION OUTCOME BOXES */
+    .outcome-list{display:flex;flex-direction:column;gap:10px;max-width:860px;margin:16px 0}
+    .outcome-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:rgba(0,230,118,0.03);border:1px solid rgba(0,230,118,0.1);border-radius:3px;font-size:0.9rem;color:var(--muted2);line-height:1.6}
+    .outcome-item .oi-check{color:var(--green);font-size:1rem;flex-shrink:0;margin-top:2px}
+    .outcome-item strong{color:var(--text)}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:16px 0;max-width:860px}
+    th{font-family:'Share Tech Mono',monospace;font-size:0.57rem;letter-spacing:3px;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);font-weight:400}
+    td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted2);vertical-align:top;line-height:1.55}
+    tr:hover td{background:rgba(255,227,0,0.01)}
     td strong{color:var(--text)}
 
-    /* ── CALLOUTS ── */
-    .callout{padding:16px 20px;border-radius:3px;margin:16px 0;font-size:0.88rem;line-height:1.6}
-    .callout-yellow{background:rgba(255,227,0,0.04);border-left:3px solid var(--yellow);color:var(--muted2)}
-    .callout-yellow strong{color:var(--yellow)}
-    .callout-red{background:rgba(255,23,68,0.04);border-left:3px solid var(--red);color:var(--muted2)}
-    .callout-green{background:rgba(0,230,118,0.04);border-left:3px solid var(--green);color:var(--muted2)}
-    .callout-green strong{color:var(--green)}
+    code{font-family:'Share Tech Mono',monospace;font-size:0.8em;color:var(--green);background:rgba(0,230,118,0.07);padding:1px 6px;border-radius:2px}
 
-    /* ── COMPONENT GRID ── */
-    .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
-    .comp-card{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:3px;padding:18px 20px;position:relative}
-    .comp-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent,var(--yellow));border-radius:3px 0 0 3px}
-    .comp-card h4{font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:3px;color:var(--accent,var(--yellow));margin-bottom:8px}
-    .comp-card p{font-size:0.82rem;color:var(--muted);line-height:1.5}
-    .comp-card .tag{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
+    /* PHASE STEPS */
+    .phases{display:flex;flex-direction:column;gap:0;max-width:780px;margin:20px 0}
+    .phase-item{display:grid;grid-template-columns:48px 1fr;gap:0}
+    .phase-left{display:flex;flex-direction:column;align-items:center}
+    .phase-dot{width:32px;height:32px;border-radius:50%;background:rgba(255,227,0,0.1);border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--yellow);flex-shrink:0}
+    .phase-line{width:2px;flex:1;background:var(--border);margin:4px 0;min-height:16px}
+    .phase-content{padding:4px 0 24px 16px}
+    .phase-content strong{display:block;font-size:0.95rem;color:var(--text);margin-bottom:4px}
+    .phase-content span{font-size:0.83rem;color:var(--muted);line-height:1.6}
 
-    /* ── PHASE TIMELINE ── */
-    .timeline{display:flex;flex-direction:column;gap:0;max-width:780px}
-    .tl-item{display:grid;grid-template-columns:100px 24px 1fr;gap:0 14px}
-    .tl-time{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);text-align:right;padding-top:4px}
-    .tl-dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);box-shadow:0 0 8px rgba(255,227,0,0.4);flex-shrink:0;margin-top:5px}
-    .tl-line{display:flex;flex-direction:column;align-items:center}
-    .tl-connector{width:1px;flex:1;min-height:24px;background:var(--border);margin:4px 0}
-    .tl-content{padding-bottom:20px}
-    .tl-content strong{display:block;font-size:0.9rem;color:var(--text);margin-bottom:3px}
-    .tl-content span{font-size:0.8rem;color:var(--muted)}
-
-    code{font-family:'Share Tech Mono',monospace;font-size:0.82em;color:var(--green);background:rgba(0,230,118,0.07);padding:1px 6px;border-radius:2px}
-
-    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar{width:5px}
     ::-webkit-scrollbar-track{background:var(--bg)}
     ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
   </style>
@@ -81,420 +107,379 @@
 <body>
 
 <div class="page-header">
-  <div class="doc-type">Wayne Enterprises — Internal Technical Documentation</div>
+  <div class="doc-eyebrow">Wayne Enterprises — Solution Architecture</div>
   <div class="doc-title">High-Level Design</div>
-  <div class="doc-sub">Always-On Ops Intelligence Agent — System Architecture Overview</div>
+  <div class="doc-sub">Always-On Ops Intelligence Agent — Problem Definition, Solution Architecture &amp; Agentic AI Overview</div>
   <div class="doc-meta">
-    <div class="doc-meta-item"><div class="mk">STATUS</div><div class="mv">Plan 1 Live · Plan 2 Designed</div></div>
-    <div class="doc-meta-item"><div class="mk">REPO</div><div class="mv">ruscoe888/always-on-agent</div></div>
-    <div class="doc-meta-item"><div class="mk">VERSION</div><div class="mv">2.0 — Post Fabricator</div></div>
-    <div class="doc-meta-item"><div class="mk">DATE</div><div class="mv">2026-06-05</div></div>
-    <div class="doc-meta-item"><div class="mk">RELATED</div><div class="mv"><a href="LLD.html">LLD</a> · <a href="plan-2-architecture.md">Plan 2</a> · <a href="agent-roster.md">Agent Roster</a></div></div>
+    <div class="doc-meta-item"><div class="mk">Classification</div><div class="mv">Internal / Client Shareable</div></div>
+    <div class="doc-meta-item"><div class="mk">Status</div><div class="mv">Plan 1 Live · Plan 2 Designed</div></div>
+    <div class="doc-meta-item"><div class="mk">Version</div><div class="mv">2.0</div></div>
+    <div class="doc-meta-item"><div class="mk">Date</div><div class="mv">2026-06-05</div></div>
+    <div class="doc-meta-item"><div class="mk">Related</div><div class="mv"><a href="LLD.html">LLD</a> · <a href="plan-2-architecture.md">Plan 2</a> · <a href="agent-roster.md">Agent Roster</a></div></div>
   </div>
 </div>
 
 <div class="page">
 
-  <!-- ── 1. PURPOSE ── -->
+  <!-- ── 1. EXECUTIVE SUMMARY ── -->
   <div class="section">
-    <div class="section-label">Section 01</div>
-    <div class="section-title">Purpose &amp; Scope</div>
-    <p class="body">This document describes the high-level architecture of the Always-On Ops Agent: a system that continuously monitors a synthetic enterprise repository for production incidents, deployment correlations, and vendor compliance violations, then surfaces findings as structured GitHub Issues and a live operations dashboard.</p>
-    <p class="body">It covers the deployed Plan 1 architecture (Claude Code durable cron), the designed Plan 2 architecture (GitHub Actions, specialised agents), the data model, the output model, and the implementation roadmap. For component-level detail, see the <a href="LLD.html">Low-Level Design</a>.</p>
+    <div class="section-eyebrow">Section 01</div>
+    <div class="section-title">Executive Summary</div>
+    <p>Operations teams in modern enterprises are overwhelmed. The volume of production incidents, the complexity of distributed systems, and the breadth of vendor compliance obligations have outpaced the capacity of human teams to monitor, triage, and respond without introducing dangerous delays and coverage gaps — particularly outside business hours.</p>
+    <p>This document describes the high-level architecture of an <strong>Always-On Ops Intelligence Agent</strong>: an agentic AI system that continuously monitors the operational health of an enterprise environment, automatically triages every production incident, identifies root causes by correlating incidents with recent deployments, and audits vendor contracts for compliance violations — 24 hours a day, 7 days a week, without human initiation.</p>
     <div class="callout callout-yellow">
-      <strong>Design philosophy:</strong> The agent is data-in, GitHub-Issues-out. The repository is the single source of truth. No external databases, no message queues, no persistent agent state beyond what lives in git and GitHub. Every component is replaceable independently.
+      <strong>Conclusion first:</strong> This system has already filed 26 structured GitHub Issues across three domains — incident triage, deployment correlation, and vendor compliance — with zero permission prompts, zero human initiation, and response times of under 4 hours on current infrastructure, reducing to under 60 seconds in the target architecture.
     </div>
   </div>
 
-  <!-- ── 2. SYSTEM CONTEXT ── -->
+  <!-- ── 2. PROBLEM STATEMENT ── -->
   <div class="section">
-    <div class="section-label">Section 02</div>
-    <div class="section-title">System Context</div>
-    <p class="body">The system sits between a structured data repository and a human operations team. It has no user-facing API and no inbound traffic. It reads, reasons, and writes.</p>
+    <div class="section-eyebrow">Section 02</div>
+    <div class="section-title">Problem Statement</div>
+    <p>The following problems were identified through discovery with the operations, engineering, and legal teams. They represent systemic gaps in the current operating model — not isolated incidents.</p>
 
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;font-family:'Rajdhani',sans-serif">
-        <defs>
-          <marker id="ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(255,227,0,0.5)"/>
-          </marker>
-          <marker id="ahg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(41,182,246,0.6)"/>
-          </marker>
-        </defs>
-
-        <!-- Outer system boundary -->
-        <rect x="230" y="10" width="440" height="300" rx="4" fill="none" stroke="rgba(255,227,0,0.12)" stroke-dasharray="6,4"/>
-        <text x="450" y="28" fill="rgba(255,227,0,0.3)" font-size="10" text-anchor="middle" font-family="Share Tech Mono,monospace" letter-spacing="3">ALWAYS-ON OPS AGENT SYSTEM</text>
-
-        <!-- External: Ops Team -->
-        <rect x="10" y="130" width="130" height="60" rx="3" fill="#0c0c0c" stroke="rgba(255,107,53,0.4)"/>
-        <text x="75" y="156" fill="#FF6B35" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">OPS TEAM</text>
-        <text x="75" y="174" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">GitHub · Dashboard</text>
-
-        <!-- External: Anthropic API -->
-        <rect x="760" y="130" width="130" height="60" rx="3" fill="#0c0c0c" stroke="rgba(186,104,200,0.4)"/>
-        <text x="825" y="156" fill="#BA68C8" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">ANTHROPIC</text>
-        <text x="825" y="174" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">Claude API / Claude Code</text>
-
-        <!-- Internal: GitHub Repo -->
-        <rect x="250" y="40" width="200" height="80" rx="3" fill="#101010" stroke="rgba(255,227,0,0.2)"/>
-        <text x="350" y="68" fill="#FFE300" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">GITHUB REPO</text>
-        <text x="350" y="85" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">issues/ · deploys/</text>
-        <text x="350" y="101" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">runbooks/ · contracts/</text>
-
-        <!-- Internal: Agent Runtime -->
-        <rect x="340" y="155" width="220" height="70" rx="3" fill="#101010" stroke="rgba(255,227,0,0.3)"/>
-        <text x="450" y="183" fill="#FFE300" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">AGENT RUNTIME</text>
-        <text x="450" y="200" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">Claude Code Cron → CLAUDE.md</text>
-        <text x="450" y="215" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">Triage · Correlation · Compliance</text>
-
-        <!-- Internal: GitHub Issues -->
-        <rect x="450" y="255" width="170" height="45" rx="3" fill="#101010" stroke="rgba(41,182,246,0.2)"/>
-        <text x="535" y="276" fill="#29B6F6" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">GITHUB ISSUES</text>
-        <text x="535" y="290" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">Triage · Correlation · Compliance</text>
-
-        <!-- Internal: Dashboard -->
-        <rect x="250" y="255" width="160" height="45" rx="3" fill="#101010" stroke="rgba(0,230,118,0.2)"/>
-        <text x="330" y="276" fill="#00E676" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DASHBOARD</text>
-        <text x="330" y="290" fill="#555" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace">Live · 30s refresh · 6 charts</text>
-
-        <!-- Arrows -->
-        <!-- Repo → Agent (reads) -->
-        <line x1="350" y1="120" x2="420" y2="155" stroke="rgba(255,227,0,0.4)" stroke-width="1.5" marker-end="url(#ah)"/>
-        <text x="372" y="137" fill="rgba(255,227,0,0.4)" font-size="8" font-family="Share Tech Mono,monospace">reads</text>
-
-        <!-- Agent → Issues -->
-        <line x1="490" y1="225" x2="510" y2="255" stroke="rgba(255,227,0,0.4)" stroke-width="1.5" marker-end="url(#ah)"/>
-        <text x="502" y="243" fill="rgba(255,227,0,0.4)" font-size="8" font-family="Share Tech Mono,monospace">files</text>
-
-        <!-- Issues → Dashboard (poll) -->
-        <line x1="450" y1="277" x2="410" y2="277" stroke="rgba(41,182,246,0.4)" stroke-width="1.5" marker-end="url(#ahg)"/>
-        <text x="420" y="270" fill="rgba(41,182,246,0.4)" font-size="8" font-family="Share Tech Mono,monospace">polls 30s</text>
-
-        <!-- OpsTeam → Dashboard -->
-        <line x1="140" y1="160" x2="250" y2="277" stroke="rgba(255,107,53,0.3)" stroke-width="1.5" marker-end="url(#ah)"/>
-        <text x="162" y="228" fill="rgba(255,107,53,0.3)" font-size="8" font-family="Share Tech Mono,monospace">views</text>
-
-        <!-- OpsTeam → Issues -->
-        <line x1="140" y1="155" x2="450" y2="260" stroke="rgba(255,107,53,0.3)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ah)"/>
-
-        <!-- Anthropic → Agent -->
-        <line x1="760" y1="180" x2="560" y2="195" stroke="rgba(186,104,200,0.3)" stroke-width="1.5" marker-end="url(#ah)"/>
-        <text x="670" y="178" fill="rgba(186,104,200,0.3)" font-size="8" font-family="Share Tech Mono,monospace">LLM inference</text>
-
-        <!-- Fabricator → Repo -->
-        <text x="253" y="155" fill="rgba(255,227,0,0.25)" font-size="9" font-family="Share Tech Mono,monospace">fabricator pushes</text>
-        <line x1="305" y1="160" x2="305" y2="120" stroke="rgba(255,227,0,0.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah)"/>
-      </svg>
-      <div class="diagram-caption">FIG 01 — System Context Diagram. Dashed lines indicate optional / planned interactions.</div>
+    <div class="problem-list">
+      <div class="problem-item">
+        <div class="pi-icon">🕐</div>
+        <div class="pi-text"><strong>Delayed incident triage</strong>Each production incident requires a human to read the alert, search for the relevant runbook, assess severity, and decide who to page. This takes 20–40 minutes per incident. During nights and weekends, incidents can sit untriaged for hours while customer impact accumulates. A P0 raised at 02:18 may not be seen until standup at 09:00.</div>
+      </div>
+      <div class="problem-item">
+        <div class="pi-icon">🔗</div>
+        <div class="pi-text"><strong>Manual and unreliable deploy correlation</strong>Determining whether a recent deployment caused an incident requires an engineer to manually cross-reference incident timestamps against deployment logs. This process is error-prone, time-consuming, and often skipped under pressure. Root causes that would be obvious in hindsight are missed in the moment.</div>
+      </div>
+      <div class="problem-item">
+        <div class="pi-icon">📄</div>
+        <div class="pi-text"><strong>Silent compliance drift</strong>Vendor contracts are reviewed at signing and then filed. Policy requirements evolve, contracts renew with altered terms, and new vendors are onboarded — but no systematic re-audit occurs. Violations accumulate silently. The current audit identified 9 active violations across two vendors, including a supplier with no termination clause for 5 years and breach notification terms of "in due course."</div>
+      </div>
+      <div class="problem-item">
+        <div class="pi-icon">👁</div>
+        <div class="pi-text"><strong>No continuous operational visibility</strong>The operations team has no single pane of glass showing incident trends, deployment risk, and compliance status together. Situational awareness requires querying multiple systems. Patterns — such as a service that is repeatedly involved in incidents — are only visible in retrospect during post-incident reviews.</div>
+      </div>
+      <div class="problem-item">
+        <div class="pi-icon">📈</div>
+        <div class="pi-text"><strong>Operational load scales with system complexity</strong>As the number of services, deployments, vendors, and customers grows, the operational burden on the team grows proportionally. The current model does not scale. Adding more engineers to the on-call rotation is not a sustainable answer — the problem requires a structural solution.</div>
+      </div>
     </div>
   </div>
 
-  <!-- ── 3. PLAN 1: CURRENT ARCHITECTURE ── -->
+  <!-- ── 3. WHAT IS AGENTIC AI ── -->
   <div class="section">
-    <div class="section-label">Section 03</div>
-    <div class="section-title">Plan 1 — Current Deployed Architecture</div>
-    <p class="body">Plan 1 is the live production system. A single Claude Code durable cron fires every 4 hours, reads the full repo state, runs three sequential analysis tasks, and files GitHub Issues for net-new findings. All agent logic lives in <code>CLAUDE.md</code>.</p>
+    <div class="section-eyebrow">Section 03</div>
+    <div class="section-title">What Is Agentic AI?</div>
+    <p>Traditional software executes explicit, pre-defined instructions. <strong>Agentic AI</strong> is different: it is software powered by a large language model (LLM) that can reason, plan multi-step workflows, read and interpret unstructured data, make judgement calls, and use tools — all from a high-level goal expressed in natural language.</p>
+    <p>Rather than coding every decision branch ("if error rate > X% AND service = Y, then page team Z"), you describe the goal and the rules, and the agent reasons about how to achieve it. This makes agents uniquely suited to operational tasks, where the data is messy, the rules are nuanced, and the edge cases are endless.</p>
 
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;font-family:'Rajdhani',sans-serif">
-        <defs>
-          <marker id="ah1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(255,227,0,0.55)"/>
-          </marker>
-          <marker id="ah1b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(41,182,246,0.5)"/>
-          </marker>
-        </defs>
+    <h3 class="sub">Key properties relevant to this system</h3>
+    <table>
+      <thead><tr><th>Property</th><th>What it means in practice</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Reads unstructured data</strong></td><td>The agent reads incident bodies, stack traces, runbooks, and contract prose — not just structured fields. It understands that "Timeout waiting for connection from pool" is a connection pool exhaustion symptom without being explicitly told.</td></tr>
+        <tr><td><strong>Multi-step reasoning</strong></td><td>The agent doesn't just match keywords — it reasons: "This incident opened at 14:18. A deploy to the same service went out at 14:04. The deploy touched PaymentService.java, which appears in the stack trace. This is likely the cause."</td></tr>
+        <tr><td><strong>Tool use</strong></td><td>The agent can call external tools: reading files, running shell commands (<code>git pull</code>, <code>gh issue create</code>), querying APIs. It decides which tools to use and in what order based on its reasoning.</td></tr>
+        <tr><td><strong>Protocol-driven behaviour</strong></td><td>The agent's behaviour is governed by a protocol document (<code>CLAUDE.md</code>) — a natural-language specification of what to do, how to decide, and what to output. Changing the protocol is as simple as editing a text file.</td></tr>
+        <tr><td><strong>Scheduled autonomy</strong></td><td>The agent runs on a schedule without human initiation. It is triggered by a cron job (Plan 1) or a repository push event (Plan 2), completes its work, and produces output — all unattended.</td></tr>
+      </tbody>
+    </table>
 
-        <!-- Layer labels -->
-        <text x="14" y="75" fill="rgba(255,227,0,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="2">TRIGGER</text>
-        <text x="14" y="175" fill="rgba(255,227,0,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="2">RUNTIME</text>
-        <text x="14" y="290" fill="rgba(255,227,0,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="2">OUTPUT</text>
-
-        <!-- Layer bands -->
-        <rect x="90" y="40" width="800" height="70" rx="3" fill="rgba(255,227,0,0.02)" stroke="rgba(255,227,0,0.07)"/>
-        <rect x="90" y="130" width="800" height="130" rx="3" fill="rgba(255,227,0,0.02)" stroke="rgba(255,227,0,0.07)"/>
-        <rect x="90" y="280" width="800" height="70" rx="3" fill="rgba(41,182,246,0.02)" stroke="rgba(41,182,246,0.07)"/>
-
-        <!-- Cron -->
-        <rect x="110" y="55" width="160" height="40" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.35)"/>
-        <text x="190" y="73" fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DURABLE CRON</text>
-        <text x="190" y="88" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">every 4h at :17 · 7-day TTL</text>
-
-        <!-- git pull -->
-        <rect x="110" y="148" width="140" height="40" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.2)"/>
-        <text x="180" y="166" fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">GIT PULL</text>
-        <text x="180" y="181" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">origin/main → local</text>
-
-        <!-- CLAUDE.md -->
-        <rect x="280" y="140" width="165" height="55" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.4)"/>
-        <text x="362" y="161" fill="#FFE300" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">CLAUDE.MD</text>
-        <text x="362" y="176" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Triage · Correlation</text>
-        <text x="362" y="188" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Compliance · Dedup</text>
-
-        <!-- Data sources -->
-        <rect x="480" y="148" width="120" height="38" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.15)"/>
-        <text x="540" y="165" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">ISSUES/</text>
-        <text x="540" y="179" fill="#444" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">PROD-XXXX.json ×N</text>
-
-        <rect x="620" y="148" width="120" height="38" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.15)"/>
-        <text x="680" y="165" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">DEPLOYS/</text>
-        <text x="680" y="179" fill="#444" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">recent.json</text>
-
-        <rect x="760" y="148" width="120" height="38" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.15)"/>
-        <text x="820" y="165" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">CONTRACTS/</text>
-        <text x="820" y="179" fill="#444" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">+ policy.md</text>
-
-        <!-- Dedup -->
-        <rect x="280" y="218" width="165" height="35" rx="3" fill="#0f0f0f" stroke="rgba(255,107,53,0.2)"/>
-        <text x="362" y="234" fill="#FF6B35" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DEDUP CHECK</text>
-        <text x="362" y="246" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">gh issue list --label ops-agent</text>
-
-        <!-- GitHub Issues output -->
-        <rect x="200" y="295" width="180" height="45" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.3)"/>
-        <text x="290" y="316" fill="#FFE300" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">GITHUB ISSUES</text>
-        <text x="290" y="331" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">agent-triage · agent-correlation · agent-compliance</text>
-
-        <!-- Dashboard -->
-        <rect x="430" y="295" width="160" height="45" rx="3" fill="#0c0c0c" stroke="rgba(0,230,118,0.3)"/>
-        <text x="510" y="316" fill="#00E676" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DASHBOARD</text>
-        <text x="510" y="331" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">6 charts · 30s refresh · drilldown</text>
-
-        <!-- Fabricator -->
-        <rect x="630" y="295" width="150" height="45" rx="3" fill="#0c0c0c" stroke="rgba(186,104,200,0.3)"/>
-        <text x="705" y="316" fill="#BA68C8" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">FABRICATOR</text>
-        <text x="705" y="331" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">every 20min · 6 templates</text>
-
-        <!-- Arrows -->
-        <line x1="190" y1="95" x2="190" y2="148" stroke="rgba(255,227,0,0.45)" stroke-width="1.5" marker-end="url(#ah1)"/>
-        <line x1="250" y1="168" x2="280" y2="168" stroke="rgba(255,227,0,0.45)" stroke-width="1.5" marker-end="url(#ah1)"/>
-        <line x1="445" y1="165" x2="480" y2="165" stroke="rgba(255,227,0,0.25)" stroke-width="1" marker-end="url(#ah1)"/>
-        <line x1="540" y1="186" x2="480" y2="210" stroke="rgba(255,227,0,0.2)" stroke-width="1" marker-end="url(#ah1)"/>
-        <line x1="445" y1="195" x2="480" y2="215" stroke="rgba(255,227,0,0.2)" stroke-width="1"/>
-        <line x1="362" y1="253" x2="290" y2="295" stroke="rgba(255,227,0,0.4)" stroke-width="1.5" marker-end="url(#ah1)"/>
-        <line x1="390" y1="280" x2="430" y2="310" stroke="rgba(41,182,246,0.35)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ah1b)"/>
-        <text x="395" y="299" fill="rgba(41,182,246,0.4)" font-size="8" font-family="Share Tech Mono,monospace">polls API</text>
-        <line x1="705" y1="295" x2="500" y2="195" stroke="rgba(186,104,200,0.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah1)"/>
-        <text x="608" y="238" fill="rgba(186,104,200,0.3)" font-size="8" font-family="Share Tech Mono,monospace">pushes issues/</text>
-      </svg>
-      <div class="diagram-caption">FIG 02 — Plan 1 Architecture. Single monolithic cron, sequential tasks, CLAUDE.md as the agent protocol.</div>
+    <div class="callout callout-blue">
+      <strong>On model choice:</strong> This system uses Anthropic's Claude — a frontier LLM with strong reasoning, instruction-following, and tool-use capabilities. The agent protocol (<code>CLAUDE.md</code>) is model-agnostic in principle, but the quality of triage reasoning, correlation detection, and compliance analysis is directly dependent on the capability of the underlying model.
     </div>
+  </div>
 
-    <div class="comp-grid">
-      <div class="comp-card">
-        <div class="tag">COMPONENT</div>
-        <h4>Durable Cron</h4>
-        <p>Claude Code CronCreate. Fires <code>17 */4 * * *</code>. Persisted to <code>.claude/scheduled_tasks.json</code>. 7-day TTL — must renew manually.</p>
+  <!-- ── 4. PROPOSED SOLUTION ── -->
+  <div class="section">
+    <div class="section-eyebrow">Section 04</div>
+    <div class="section-title">Proposed Solution</div>
+    <p>The solution is a system of specialised AI agents that continuously monitor a structured repository of operational data — incidents, deployments, runbooks, and vendor contracts — and produce structured, actionable findings as GitHub Issues, visible in a live operations dashboard.</p>
+    <p>The repository is the single source of truth. The agents read from it, reason about it, and write their findings back to GitHub. No external databases, no custom infrastructure, no proprietary monitoring tools. The system runs on top of tools the team already uses.</p>
+
+    <div class="outcome-list">
+      <div class="outcome-item"><span class="oi-check">◆</span><div><strong>Every incident triaged automatically</strong> — severity assigned (P0–P3), matching runbook identified, specific fix steps included, on-call team named. Available within 4 hours on Plan 1; under 60 seconds on Plan 2.</div></div>
+      <div class="outcome-item"><span class="oi-check">◆</span><div><strong>Deploy correlation done for you</strong> — every incident is cross-referenced against the deployment log. Causal chains (multiple deploys together causing an issue) are detected. Rollback recommendations are explicit and versioned.</div></div>
+      <div class="outcome-item"><span class="oi-check">◆</span><div><strong>Continuous compliance audit</strong> — vendor contracts are re-checked against policy on every run. Violations are filed the moment they are detected, not the next time someone remembers to look.</div></div>
+      <div class="outcome-item"><span class="oi-check">◆</span><div><strong>Live operational dashboard</strong> — a single view of all findings: open issues by severity, category trends over day/week/month, a rolling 60-minute live activity feed. Click any data point to drill down to individual findings.</div></div>
+      <div class="outcome-item"><span class="oi-check">◆</span><div><strong>Scales without adding headcount</strong> — as the number of services, incidents, and vendors grows, the agent handles it. The operational load on the team does not increase proportionally.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 5. AGENT OVERVIEW ── -->
+  <div class="section">
+    <div class="section-eyebrow">Section 05</div>
+    <div class="section-title">Agent Overview</div>
+    <p>The system is composed of six specialised agents. Each agent has a single, bounded responsibility. They share no direct communication — they interact through the shared repository and GitHub Issues. This design means each agent can be developed, tested, replaced, or paused independently without affecting the others.</p>
+
+    <div class="agent-grid">
+      <div class="agent-card acc-yellow">
+        <div class="ac-num">1</div>
+        <div class="ac-tag">Plan 2 · Event-Driven</div>
+        <h4>Watcher</h4>
+        <p>Detects new data pushed to the repository and immediately dispatches the Triage and Correlation agents. Replaces the 4-hour polling cycle with sub-60-second event-driven response.</p>
       </div>
-      <div class="comp-card" style="--accent:var(--yellow)">
-        <div class="tag">COMPONENT</div>
-        <h4>CLAUDE.md</h4>
-        <p>The agent brain. Loaded automatically when Claude Code enters the repo directory. Contains severity rubric, runbook keywords, correlation logic, compliance rules, dedup protocol, and output format.</p>
+      <div class="agent-card acc-orange">
+        <div class="ac-num">2</div>
+        <div class="ac-tag">Plan 1 Live · Plan 2 Specialised</div>
+        <h4>Triage Agent</h4>
+        <p>Reads each production incident, assigns P0–P3 severity, matches against the runbook library, recommends specific remediation steps, and identifies the correct on-call team.</p>
       </div>
-      <div class="comp-card" style="--accent:var(--purple)">
-        <div class="tag">COMPONENT</div>
+      <div class="agent-card acc-blue">
+        <div class="ac-num">3</div>
+        <div class="ac-tag">Plan 1 Live · Plan 2 Specialised</div>
+        <h4>Correlation Agent</h4>
+        <p>Cross-references each incident against the deployment log. Identifies which deploy (or combination of deploys) caused each incident. Recommends rollbacks where available.</p>
+      </div>
+      <div class="agent-card acc-purple">
+        <div class="ac-num">4</div>
+        <div class="ac-tag">Plan 1 Live · Plan 2 Daily</div>
+        <h4>Compliance Agent</h4>
+        <p>Audits every vendor contract against the 7-rule compliance policy. Files a separate GitHub Issue for each violation with the exact contract clause, the policy requirement, and the specific gap.</p>
+      </div>
+      <div class="agent-card acc-purple">
+        <div class="ac-num">5</div>
+        <div class="ac-tag">Active · Dev/Staging Only</div>
         <h4>Fabricator Agent</h4>
-        <p><code>scripts/fabricate-issue.py</code>. 6 realistic issue templates. Auto-increments PROD-ID. Commits and pushes every 20 minutes. Dev/staging only.</p>
+        <p>Generates realistic synthetic production incidents every 20 minutes from 6 incident templates. Keeps the live dashboard feed active and provides a continuous stream of test data for the triage and correlation agents.</p>
       </div>
-      <div class="comp-card" style="--accent:var(--blue)">
-        <div class="tag">COMPONENT</div>
-        <h4>GitHub Issues</h4>
-        <p>Output store. Labels: <code>ops-agent</code>, <code>agent-triage</code>, <code>agent-correlation</code>, <code>agent-compliance</code>, <code>agent-fabricated</code>. Dedup by title-matching.</p>
-      </div>
-      <div class="comp-card" style="--accent:var(--green)">
-        <div class="tag">COMPONENT</div>
-        <h4>Dashboard</h4>
-        <p><code>dashboard/index.html</code>. Polls GitHub Issues API every 30s. 6 charts including a rolling 60-minute live activity feed. Click-to-drilldown on all charts.</p>
-      </div>
-      <div class="comp-card" style="--accent:var(--muted)">
-        <div class="tag">COMPONENT</div>
-        <h4>Repo (Data Store)</h4>
-        <p>Single source of truth. <code>issues/</code>, <code>deploys/recent.json</code>, <code>runbooks/</code>, <code>contracts/</code>, <code>compliance-policy.md</code>. No database — git is the storage layer.</p>
+      <div class="agent-card acc-muted">
+        <div class="ac-num">6</div>
+        <div class="ac-tag">Plan 2 · Weekly</div>
+        <h4>Keeper Agent</h4>
+        <p>Audits the agent ecosystem itself. Checks that all scheduled agents are running, runbooks are current, compliance policy has been reviewed, and the GitHub Issues deduplication list is not overflowing.</p>
       </div>
     </div>
   </div>
 
-  <!-- ── 4. PLAN 2: TARGET ARCHITECTURE ── -->
+  <!-- ── 6. HIGH-LEVEL ARCHITECTURE DIAGRAM ── -->
   <div class="section">
-    <div class="section-label">Section 04</div>
-    <div class="section-title">Plan 2 — Target Architecture (GitHub Actions)</div>
-    <p class="body">Plan 2 replaces the 4-hour polling cron with event-driven GitHub Actions. Six specialised agents replace the single monolith — each with a bounded responsibility, a small context window, and a specific trigger.</p>
-    <div class="callout callout-green">
-      <strong>Key improvement:</strong> A new issue pushed to the repo triggers triage and correlation within <strong>60 seconds</strong>, not up to 4 hours. The compliance agent runs daily. The keeper agent watches the agent ecosystem itself.
-    </div>
+    <div class="section-eyebrow">Section 06</div>
+    <div class="section-title">Logical Architecture</div>
+    <p>The following diagram shows the logical architecture of the system. It is intentionally high-level — components are shown by function, not by implementation. The <a href="LLD.html">Low-Level Design</a> document provides the implementation-level detail for each component.</p>
 
     <div class="diagram-wrap">
-      <svg viewBox="0 0 960 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:960px;font-family:'Rajdhani',sans-serif">
+      <svg viewBox="0 0 980 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:980px" font-family="Rajdhani,sans-serif">
         <defs>
-          <marker id="ah2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(255,227,0,0.5)"/>
-          </marker>
-          <marker id="ah2b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="rgba(41,182,246,0.5)"/>
-          </marker>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="rgba(255,227,0,0.55)"/></marker>
+          <marker id="arrb" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="rgba(41,182,246,0.55)"/></marker>
+          <marker id="arrg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="rgba(0,230,118,0.55)"/></marker>
+          <marker id="arrp" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="rgba(186,104,200,0.55)"/></marker>
         </defs>
 
-        <!-- Layer backgrounds -->
-        <rect x="10" y="25" width="940" height="80" rx="3" fill="rgba(255,227,0,0.02)" stroke="rgba(255,227,0,0.08)"/>
-        <text x="20" y="43" fill="rgba(255,227,0,0.25)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">TRIGGERS</text>
+        <!-- ── LAYER LABELS ── -->
+        <text x="12" y="78"  fill="rgba(255,227,0,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">DATA LAYER</text>
+        <text x="12" y="238" fill="rgba(255,227,0,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">AGENT LAYER</text>
+        <text x="12" y="418" fill="rgba(41,182,246,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">OUTPUT LAYER</text>
+        <text x="12" y="518" fill="rgba(0,230,118,0.2)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">VISIBILITY LAYER</text>
 
-        <rect x="10" y="125" width="940" height="180" rx="3" fill="rgba(0,230,118,0.015)" stroke="rgba(0,230,118,0.08)"/>
-        <text x="20" y="143" fill="rgba(0,230,118,0.25)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">GITHUB ACTIONS — SPECIALISED AGENTS</text>
+        <!-- ── LAYER BANDS ── -->
+        <rect x="80" y="50"  width="890" height="145" rx="4" fill="rgba(255,227,0,0.02)"  stroke="rgba(255,227,0,0.07)"/>
+        <rect x="80" y="215" width="890" height="165" rx="4" fill="rgba(255,227,0,0.02)"  stroke="rgba(255,227,0,0.07)"/>
+        <rect x="80" y="400" width="890" height="90"  rx="4" fill="rgba(41,182,246,0.02)" stroke="rgba(41,182,246,0.07)"/>
+        <rect x="80" y="500" width="890" height="48"  rx="4" fill="rgba(0,230,118,0.02)"  stroke="rgba(0,230,118,0.07)"/>
 
-        <rect x="10" y="325" width="940" height="120" rx="3" fill="rgba(41,182,246,0.02)" stroke="rgba(41,182,246,0.08)"/>
-        <text x="20" y="343" fill="rgba(41,182,246,0.25)" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="3">OUTPUTS</text>
+        <!-- ── DATA LAYER ── -->
+        <!-- Incidents -->
+        <rect x="100" y="70" width="158" height="105" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.25)"/>
+        <text x="179" y="96"  fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">INCIDENTS</text>
+        <text x="179" y="113" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">issues/PROD-XXXX.json</text>
+        <text x="179" y="128" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">12 issues · growing</text>
+        <text x="179" y="145" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">id · title · body · opened_at</text>
+        <text x="179" y="161" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">severity: null (agent fills)</text>
 
-        <!-- Triggers -->
-        <rect x="30" y="40" width="130" height="45" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.3)"/>
-        <text x="95" y="60" fill="#FFE300" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">GIT PUSH</text>
-        <text x="95" y="76" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">issues/** → event</text>
+        <!-- Deployments -->
+        <rect x="278" y="70" width="158" height="105" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.25)"/>
+        <text x="357" y="96"  fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DEPLOYMENTS</text>
+        <text x="357" y="113" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">deploys/recent.json</text>
+        <text x="357" y="128" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">5 deploys on record</text>
+        <text x="357" y="145" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">service · version · timestamp</text>
+        <text x="357" y="161" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">rollback_available flag</text>
 
-        <rect x="185" y="40" width="145" height="45" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.2)"/>
-        <text x="257" y="60" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">SCHEDULE (HOURLY)</text>
-        <text x="257" y="76" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">backlog processing</text>
+        <!-- Runbooks -->
+        <rect x="456" y="70" width="158" height="105" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.25)"/>
+        <text x="535" y="96"  fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">RUNBOOKS</text>
+        <text x="535" y="113" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">runbooks/*.md</text>
+        <text x="535" y="128" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">3 runbooks today</text>
+        <text x="535" y="145" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">auth · cdn · payment</text>
+        <text x="535" y="161" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">extensible via CLAUDE.md</text>
 
-        <rect x="355" y="40" width="145" height="45" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.2)"/>
-        <text x="427" y="60" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">SCHEDULE (DAILY)</text>
-        <text x="427" y="76" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">06:00 UTC</text>
+        <!-- Contracts -->
+        <rect x="634" y="70" width="158" height="105" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.25)"/>
+        <text x="713" y="96"  fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">CONTRACTS</text>
+        <text x="713" y="113" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">contracts/*.md</text>
+        <text x="713" y="128" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">3 vendors · prose Markdown</text>
+        <text x="713" y="145" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">+ compliance-policy.md</text>
+        <text x="713" y="161" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">7 policy rules</text>
 
-        <rect x="525" y="40" width="145" height="45" rx="3" fill="#0f0f0f" stroke="rgba(186,104,200,0.3)"/>
-        <text x="597" y="60" fill="#BA68C8" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">SCHEDULE (20MIN)</text>
-        <text x="597" y="76" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">dev/staging only</text>
+        <!-- Agent Protocol -->
+        <rect x="812" y="70" width="148" height="105" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.45)"/>
+        <text x="886" y="96"  fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">AGENT PROTOCOL</text>
+        <text x="886" y="113" fill="#888" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">CLAUDE.md</text>
+        <text x="886" y="128" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">severity rubric · keywords</text>
+        <text x="886" y="145" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">correlation logic · dedup</text>
+        <text x="886" y="161" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">versioned in git · PR-reviewed</text>
 
-        <rect x="695" y="40" width="145" height="45" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.2)"/>
-        <text x="767" y="60" fill="#888" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">SCHEDULE (WEEKLY)</text>
-        <text x="767" y="76" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Mon 08:00 UTC</text>
+        <!-- ── TRIGGERS ── -->
+        <!-- Cron / Push label -->
+        <text x="390" y="210" fill="rgba(255,227,0,0.35)" font-size="9" text-anchor="middle" font-family="Share Tech Mono,monospace" letter-spacing="2">TRIGGERS: CRON (4h) · PUSH EVENT (&lt;60s) · SCHEDULE (daily/weekly)</text>
 
-        <!-- Agents -->
+        <!-- ── AGENT LAYER ── -->
         <!-- Watcher -->
-        <rect x="30" y="148" width="130" height="55" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.4)"/>
-        <text x="95" y="170" fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">WATCHER</text>
-        <text x="95" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">detects new issues</text>
-        <text x="95" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">dispatches agents</text>
+        <rect x="100" y="228" width="130" height="136" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.4)"/>
+        <text x="165" y="252" fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">WATCHER</text>
+        <text x="165" y="268" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">on: git push</text>
+        <text x="165" y="282" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">issues/**</text>
+        <text x="165" y="302" fill="#888" font-size="9" text-anchor="middle">Detects new data</text>
+        <text x="165" y="317" fill="#888" font-size="9" text-anchor="middle">Dispatches agents</text>
+        <text x="165" y="332" fill="#888" font-size="9" text-anchor="middle">Sub-60s latency</text>
+        <text x="165" y="352" fill="rgba(255,227,0,0.3)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Plan 2</text>
 
         <!-- Triage -->
-        <rect x="185" y="148" width="130" height="55" rx="3" fill="#0f0f0f" stroke="rgba(255,107,53,0.4)"/>
-        <text x="250" y="170" fill="#FF6B35" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">TRIAGE</text>
-        <text x="250" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">severity + runbook</text>
-        <text x="250" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">1 issue in → 1 out</text>
+        <rect x="250" y="228" width="145" height="136" rx="3" fill="#0f0f0f" stroke="rgba(255,107,53,0.45)"/>
+        <text x="322" y="252" fill="#FF6B35" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">TRIAGE</text>
+        <text x="322" y="268" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">reads: issues/ + runbooks/</text>
+        <text x="322" y="282" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">writes: [Agent Triage]</text>
+        <text x="322" y="302" fill="#888" font-size="9" text-anchor="middle">P0–P3 severity</text>
+        <text x="322" y="317" fill="#888" font-size="9" text-anchor="middle">Runbook match</text>
+        <text x="322" y="332" fill="#888" font-size="9" text-anchor="middle">On-call routing</text>
+        <text x="322" y="352" fill="rgba(0,230,118,0.5)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Live</text>
 
         <!-- Correlation -->
-        <rect x="335" y="148" width="135" height="55" rx="3" fill="#0f0f0f" stroke="rgba(41,182,246,0.4)"/>
-        <text x="402" y="170" fill="#29B6F6" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">CORRELATION</text>
-        <text x="402" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">deploy x-ref 48h</text>
-        <text x="402" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">causal chain detect</text>
+        <rect x="415" y="228" width="150" height="136" rx="3" fill="#0f0f0f" stroke="rgba(41,182,246,0.45)"/>
+        <text x="490" y="252" fill="#29B6F6" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">CORRELATION</text>
+        <text x="490" y="268" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">reads: issues/ + deploys/</text>
+        <text x="490" y="282" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">writes: [Agent Correlation]</text>
+        <text x="490" y="302" fill="#888" font-size="9" text-anchor="middle">48h window</text>
+        <text x="490" y="317" fill="#888" font-size="9" text-anchor="middle">Causal chains</text>
+        <text x="490" y="332" fill="#888" font-size="9" text-anchor="middle">Rollback advice</text>
+        <text x="490" y="352" fill="rgba(0,230,118,0.5)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Live</text>
 
         <!-- Compliance -->
-        <rect x="490" y="148" width="135" height="55" rx="3" fill="#0f0f0f" stroke="rgba(186,104,200,0.4)"/>
-        <text x="557" y="170" fill="#BA68C8" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">COMPLIANCE</text>
-        <text x="557" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">7-rule contract audit</text>
-        <text x="557" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">daily · per violation</text>
+        <rect x="585" y="228" width="150" height="136" rx="3" fill="#0f0f0f" stroke="rgba(186,104,200,0.45)"/>
+        <text x="660" y="252" fill="#BA68C8" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">COMPLIANCE</text>
+        <text x="660" y="268" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">reads: contracts/ + policy</text>
+        <text x="660" y="282" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">writes: [Agent Compliance]</text>
+        <text x="660" y="302" fill="#888" font-size="9" text-anchor="middle">7-rule audit</text>
+        <text x="660" y="317" fill="#888" font-size="9" text-anchor="middle">Per-clause findings</text>
+        <text x="660" y="332" fill="#888" font-size="9" text-anchor="middle">CRIT/HIGH/MED severity</text>
+        <text x="660" y="352" fill="rgba(0,230,118,0.5)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Live · Daily schedule</text>
 
         <!-- Fabricator -->
-        <rect x="645" y="148" width="130" height="55" rx="3" fill="#0f0f0f" stroke="rgba(186,104,200,0.3)"/>
-        <text x="710" y="170" fill="#BA68C8" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">FABRICATOR</text>
-        <text x="710" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">synthetic issues</text>
-        <text x="710" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">6 templates · dev only</text>
+        <rect x="755" y="228" width="130" height="136" rx="3" fill="#0f0f0f" stroke="rgba(186,104,200,0.3)"/>
+        <text x="820" y="252" fill="#BA68C8" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">FABRICATOR</text>
+        <text x="820" y="268" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">writes: issues/PROD-*.json</text>
+        <text x="820" y="282" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">+ git commit + push</text>
+        <text x="820" y="302" fill="#888" font-size="9" text-anchor="middle">6 templates</text>
+        <text x="820" y="317" fill="#888" font-size="9" text-anchor="middle">Every 20 min</text>
+        <text x="820" y="332" fill="#888" font-size="9" text-anchor="middle">Dev/staging only</text>
+        <text x="820" y="352" fill="rgba(0,230,118,0.5)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Live</text>
 
-        <!-- Keeper -->
-        <rect x="795" y="148" width="130" height="55" rx="3" fill="#0f0f0f" stroke="rgba(255,227,0,0.2)"/>
-        <text x="860" y="170" fill="#888" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="1">KEEPER</text>
-        <text x="860" y="184" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">agent governance</text>
-        <text x="860" y="196" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">weekly audit</text>
+        <!-- ── DATA → AGENT reads ── -->
+        <line x1="179" y1="175" x2="280" y2="228" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <line x1="357" y1="175" x2="460" y2="228" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <line x1="535" y1="175" x2="322" y2="228" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <line x1="713" y1="175" x2="635" y2="228" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <!-- CLAUDE.md → all agents -->
+        <line x1="886" y1="175" x2="820" y2="228" stroke="rgba(255,227,0,0.3)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
 
-        <!-- Shared: GitHub Repo (data) -->
-        <rect x="30" y="240" width="740" height="40" rx="3" fill="#0a0a0a" stroke="rgba(255,227,0,0.12)"/>
-        <text x="400" y="257" fill="rgba(255,227,0,0.4)" font-size="10" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="3">GITHUB REPO — issues/ · deploys/ · runbooks/ · contracts/ · CLAUDE.md</text>
-        <text x="400" y="272" fill="#444" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Single source of truth · All agents read from here · Fabricator writes here</text>
+        <!-- ── AGENT → OUTPUT ── -->
+        <!-- Triage → GitHub Issues -->
+        <line x1="322" y1="364" x2="322" y2="415" stroke="rgba(255,107,53,0.45)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Correlation → GitHub Issues -->
+        <line x1="490" y1="364" x2="450" y2="415" stroke="rgba(41,182,246,0.45)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Compliance → GitHub Issues -->
+        <line x1="660" y1="364" x2="580" y2="415" stroke="rgba(186,104,200,0.45)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Fabricator → Data (loop back) -->
+        <line x1="820" y1="228" x2="820" y2="200" stroke="rgba(186,104,200,0.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <line x1="820" y1="200" x2="200" y2="200" stroke="rgba(186,104,200,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="200" y1="200" x2="179" y2="175" stroke="rgba(186,104,200,0.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <text x="500" y="196" fill="rgba(186,104,200,0.3)" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">fabricator pushes new issues</text>
 
-        <!-- Outputs -->
-        <rect x="130" y="350" width="200" height="50" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.3)"/>
-        <text x="230" y="371" fill="#FFE300" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">GITHUB ISSUES</text>
-        <text x="230" y="386" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">triage · correlation · compliance</text>
+        <!-- ── OUTPUT LAYER ── -->
+        <rect x="200" y="415" width="560" height="62" rx="3" fill="#0c0c0c" stroke="rgba(255,227,0,0.3)"/>
+        <text x="480" y="440" fill="#FFE300" font-size="13" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="3">GITHUB ISSUES — STRUCTURED FINDINGS</text>
+        <text x="480" y="457" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">26 issues filed · labels: ops-agent · agent-triage · agent-correlation · agent-compliance · agent-fabricated · dedup: title-match</text>
+        <text x="480" y="470" fill="#555" font-size="8.5" text-anchor="middle" font-family="Share Tech Mono,monospace">each issue: severity · runbook · evidence · rollback recommendation · source file reference</text>
 
-        <rect x="370" y="350" width="180" height="50" rx="3" fill="#0c0c0c" stroke="rgba(0,230,118,0.3)"/>
-        <text x="460" y="371" fill="#00E676" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">DASHBOARD</text>
-        <text x="460" y="386" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">live feed · 6 charts · 30s poll</text>
+        <!-- ── VISIBILITY LAYER ── -->
+        <line x1="480" y1="477" x2="480" y2="500" stroke="rgba(0,230,118,0.4)" stroke-width="1.5" marker-end="url(#arrg)"/>
+        <rect x="160" y="500" width="640" height="38" rx="3" fill="#0c0c0c" stroke="rgba(0,230,118,0.3)"/>
+        <text x="480" y="518" fill="#00E676" font-size="12" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="3">LIVE DASHBOARD — 6 CHARTS · 30-SECOND AUTO-REFRESH · CLICK-TO-DRILLDOWN</text>
+        <text x="480" y="533" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">single HTML file · reads GitHub Issues API · no backend · share the URL</text>
 
-        <rect x="590" y="350" width="200" height="50" rx="3" fill="#0c0c0c" stroke="rgba(255,23,68,0.3)"/>
-        <text x="690" y="371" fill="#FF1744" font-size="11" font-weight="700" text-anchor="middle" font-family="Bebas Neue,cursive" letter-spacing="2">ALERTS (PLANNED)</text>
-        <text x="690" y="386" fill="#555" font-size="8" text-anchor="middle" font-family="Share Tech Mono,monospace">Slack · PagerDuty · P0 escalation</text>
-
-        <!-- Trigger → Agent arrows -->
-        <line x1="95" y1="85" x2="95" y2="148" stroke="rgba(255,227,0,0.4)" stroke-width="1.5" marker-end="url(#ah2)"/>
-        <line x1="257" y1="85" x2="250" y2="148" stroke="rgba(255,227,0,0.25)" stroke-width="1" marker-end="url(#ah2)"/>
-        <line x1="257" y1="85" x2="402" y2="148" stroke="rgba(255,227,0,0.25)" stroke-width="1" marker-end="url(#ah2)"/>
-        <line x1="427" y1="85" x2="557" y2="148" stroke="rgba(255,227,0,0.25)" stroke-width="1" marker-end="url(#ah2)"/>
-        <line x1="597" y1="85" x2="710" y2="148" stroke="rgba(186,104,200,0.35)" stroke-width="1" marker-end="url(#ah2)"/>
-        <line x1="767" y1="85" x2="860" y2="148" stroke="rgba(255,227,0,0.2)" stroke-width="1" marker-end="url(#ah2)"/>
-
-        <!-- Agent → Repo reads -->
-        <line x1="250" y1="203" x2="320" y2="240" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="402" y1="203" x2="400" y2="240" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="557" y1="203" x2="480" y2="240" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
-
-        <!-- Fabricator → Repo (push) -->
-        <line x1="710" y1="203" x2="620" y2="240" stroke="rgba(186,104,200,0.3)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah2)"/>
-
-        <!-- Agents → Issues -->
-        <line x1="250" y1="203" x2="230" y2="350" stroke="rgba(255,107,53,0.35)" stroke-width="1.5" marker-end="url(#ah2)"/>
-        <line x1="402" y1="203" x2="270" y2="350" stroke="rgba(41,182,246,0.35)" stroke-width="1.5" marker-end="url(#ah2)"/>
-        <line x1="557" y1="203" x2="330" y2="350" stroke="rgba(186,104,200,0.35)" stroke-width="1.5" marker-end="url(#ah2)"/>
-
-        <!-- Issues → Dashboard poll -->
-        <line x1="330" y1="375" x2="370" y2="375" stroke="rgba(0,230,118,0.3)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ah2b)"/>
-        <text x="334" y="368" fill="rgba(0,230,118,0.35)" font-size="7" font-family="Share Tech Mono,monospace">polls 30s</text>
+        <!-- Legend -->
+        <line x1="100" y1="553" x2="130" y2="553" stroke="rgba(255,227,0,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="135" y="557" fill="#555" font-size="8" font-family="Share Tech Mono,monospace">agent writes</text>
+        <line x1="220" y1="553" x2="250" y2="553" stroke="rgba(255,227,0,0.2)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <text x="255" y="557" fill="#555" font-size="8" font-family="Share Tech Mono,monospace">agent reads</text>
       </svg>
-      <div class="diagram-caption">FIG 03 — Plan 2 Target Architecture. Event-driven, specialised agents, sub-60s triage latency. Dashed arrows = read access. Solid arrows = write/trigger.</div>
+      <div class="diagram-caption">FIG 01 — Logical Architecture. Data layer feeds the agent layer. Agent layer writes findings to GitHub Issues. Dashboard reads from GitHub Issues API. Dashed lines = read access. Solid lines = write/trigger. The Fabricator loops back to the Data layer, feeding new incidents for agents to process.</div>
     </div>
   </div>
 
-  <!-- ── 5. TECHNOLOGY DECISIONS ── -->
+  <!-- ── 7. IMPLEMENTATION APPROACH ── -->
   <div class="section">
-    <div class="section-label">Section 05</div>
-    <div class="section-title">Technology Decisions</div>
+    <div class="section-eyebrow">Section 07</div>
+    <div class="section-title">Implementation Approach</div>
+    <p>The system is being delivered in phases. Phase 1 is live today. Phases 2 and 3 represent the target architecture, with Phase 2 being the priority for the next sprint.</p>
+
+    <div class="phases">
+      <div class="phase-item">
+        <div class="phase-left"><div class="phase-dot dot-green">1</div><div class="phase-line"></div></div>
+        <div class="phase-content">
+          <strong>Phase 1 — Foundation (Live)</strong>
+          <span>Single monolithic Claude Code agent running on a 4-hour durable cron. Covers all three domains (triage, correlation, compliance) in one run. Protocol versioned in CLAUDE.md. 26 GitHub Issues filed. Live dashboard with 6 charts and 30-second refresh. Issue fabricator running every 20 minutes. Global permission allowlist for zero-prompt autonomous operation.</span>
+        </div>
+      </div>
+      <div class="phase-item">
+        <div class="phase-left"><div class="phase-dot">2</div><div class="phase-line"></div></div>
+        <div class="phase-content">
+          <strong>Phase 2 — Specialisation (Next Sprint)</strong>
+          <span>Migrate from Claude Code cron to GitHub Actions. Split the monolith into 6 specialised agents — one per responsibility. Watcher agent responds to push events in under 60 seconds. Compliance agent runs daily. Keeper agent provides weekly governance. Agents run in GitHub's cloud infrastructure with no local machine dependency and no TTL expiry.</span>
+        </div>
+      </div>
+      <div class="phase-item">
+        <div class="phase-left"><div class="phase-dot dot-muted">3</div></div>
+        <div class="phase-content">
+          <strong>Phase 3 — Full Autonomy (Future)</strong>
+          <span>P0 escalation via Slack and PagerDuty webhook. CI/CD pipeline automatically appends to the deployment log on every deploy — closing the last manual data gap. Auto-close stale issues. PR-based review gate for protocol changes. Keeper Agent extended with automated remediation suggestions.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. DESIGN PRINCIPLES ── -->
+  <div class="section">
+    <div class="section-eyebrow">Section 08</div>
+    <div class="section-title">Design Principles</div>
+    <p>The following principles guided the architectural decisions in this system. They are documented here so that future extensions and modifications remain consistent with the original intent.</p>
     <table>
-      <thead>
-        <tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Rationale</th><th>Accepted Trade-off</th></tr>
-      </thead>
+      <thead><tr><th>Principle</th><th>What it means for this system</th></tr></thead>
       <tbody>
-        <tr><td><strong>Agent runtime (Plan 1)</strong></td><td>Claude Code durable cron</td><td>GitHub Actions scheduled workflow</td><td>Zero infrastructure. No secrets to configure. Runs in existing Claude Code session.</td><td>7-day TTL. Machine-dependent.</td></tr>
-        <tr><td><strong>Agent runtime (Plan 2)</strong></td><td>GitHub Actions</td><td>AWS Lambda + EventBridge</td><td>Repo-native. Free tier covers workload. No infra to manage. Integrated with push events.</td><td>Anthropic API key must be a GitHub Secret.</td></tr>
-        <tr><td><strong>Output format</strong></td><td>GitHub Issues</td><td>Markdown reports committed to repo</td><td>Issues are actionable, closeable, and assignable. Labels enable dedup queries.</td><td>Issues accumulate — no auto-close on resolution.</td></tr>
-        <tr><td><strong>Agent protocol</strong></td><td>CLAUDE.md in repo</td><td>Embedded in cron/workflow prompt</td><td>Version-controlled, PR-reviewable, auto-loaded by Claude Code. Changing behaviour = a commit.</td><td>Agent must cd into repo to load it.</td></tr>
-        <tr><td><strong>Data store</strong></td><td>Git repo (JSON + Markdown)</td><td>PostgreSQL / DynamoDB</td><td>No infra. Version history free. Human-readable. Works with gh CLI natively.</td><td>No structured queries. Dedup is O(n) title scan.</td></tr>
-        <tr><td><strong>Dashboard</strong></td><td>Static HTML + GitHub API</td><td>Grafana / Retool / custom backend</td><td>Zero infra. Share a file URL. Updates automatically as GitHub Issues change.</td><td>60 unauthenticated API req/h limit. No auth for private repos.</td></tr>
-        <tr><td><strong>Issue fabrication</strong></td><td>Python script + cron</td><td>Manual test data only</td><td>Keeps the live feed active for demos. Tests agent dedup and triage on novel inputs.</td><td>Synthetic issues mixed with real ones — requires agent-fabricated label to distinguish.</td></tr>
+        <tr><td><strong>Repository as single source of truth</strong></td><td>All data the agents read lives in the git repository — incidents, deployments, runbooks, contracts, and the agent protocol. No external databases. Every input is versioned, auditable, and human-readable.</td></tr>
+        <tr><td><strong>Protocol in version control</strong></td><td>Agent behaviour is defined in <code>CLAUDE.md</code>, committed to the repository. Changing what the agent does requires a pull request — creating a natural review gate for behavioural changes.</td></tr>
+        <tr><td><strong>One agent, one job</strong></td><td>Each agent has a single, bounded responsibility. It reads the minimum data it needs and writes exactly one type of output. This makes agents independently testable, replaceable, and debuggable.</td></tr>
+        <tr><td><strong>GitHub Issues as the message bus</strong></td><td>Agents do not call each other directly. They communicate through the shared state of GitHub Issues — one agent's output can trigger another agent's attention, but there is no direct coupling.</td></tr>
+        <tr><td><strong>Zero infrastructure preference</strong></td><td>The system runs on tools the team already has: git, GitHub, Claude Code. No new databases, no custom backends, no managed queues. The dashboard is a single HTML file.</td></tr>
+        <tr><td><strong>Deduplication by design</strong></td><td>Every agent checks for existing findings before creating new ones. Re-runs only produce net-new findings. This makes the system safe to run frequently without creating noise.</td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- ── 6. IMPLEMENTATION ROADMAP ── -->
+  <!-- ── 9. ASSUMPTIONS AND CONSTRAINTS ── -->
   <div class="section">
-    <div class="section-label">Section 06</div>
-    <div class="section-title">Implementation Roadmap</div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-time">COMPLETE</div>
-        <div class="tl-line"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-connector"></div></div>
-        <div class="tl-content"><strong>Plan 1 — Claude Code Cron (Live)</strong><span>Durable cron every 4h · CLAUDE.md monolith · 20+ GitHub Issues filed · Dashboard with 6 charts and 30s refresh · Fabricator running every 20 minutes · Global allowlist for zero-prompt operation</span></div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">NEXT SPRINT</div>
-        <div class="tl-line"><div class="tl-dot" style="background:var(--yellow)"></div><div class="tl-connector"></div></div>
-        <div class="tl-content"><strong>Plan 2 — Specialised GitHub Actions Agents</strong><span>Create agents/ directory · Write per-agent CLAUDE.md files · Add .github/workflows/ · Add ANTHROPIC_API_KEY to GitHub Secrets · Test push trigger → triage in &lt;60s</span></div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">FUTURE</div>
-        <div class="tl-line"><div class="tl-dot" style="background:var(--muted)"></div><div class="tl-connector"></div></div>
-        <div class="tl-content"><strong>Plan 3 — Full Autonomy</strong><span>Slack/PagerDuty webhook for P0 escalation · Keeper Agent for governance · Auto-close stale issues · CI/CD writes to deploys/recent.json automatically · PR review gate on CLAUDE.md changes</span></div>
-      </div>
+    <div class="section-eyebrow">Section 09</div>
+    <div class="section-title">Assumptions &amp; Constraints</div>
+    <div class="callout callout-red">
+      <strong>Current constraint — Phase 1:</strong> The Claude Code durable cron has a 7-day TTL and requires manual renewal. It also requires a local machine running Claude Code. Phase 2 (GitHub Actions) eliminates both constraints.
     </div>
-    <div class="callout callout-yellow" style="margin-top:24px">
-      <strong>Critical dependency for Plan 2:</strong> Anthropic API key must be available as a GitHub Actions secret (<code>ANTHROPIC_API_KEY</code>). Without it, the actions cannot invoke Claude. This is the only external dependency.
-    </div>
+    <table>
+      <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Data quality dependency</strong></td><td>The agent's analysis is only as good as the data in the repository. Incidents missing an <code>opened_at</code> timestamp, or deployments not recorded in <code>recent.json</code>, will be missed or incorrectly analysed.</td></tr>
+        <tr><td><strong>Runbook coverage</strong></td><td>The agent can only recommend runbook-based actions for incidents that match an existing runbook. Novel incident types are flagged but not remediated. The runbook library must be actively maintained.</td></tr>
+        <tr><td><strong>Deploy data is manual (Phase 1)</strong></td><td><code>deploys/recent.json</code> is currently hand-maintained. Phase 2 adds a CI/CD step that appends automatically, but until then, any deploy not recorded cannot be correlated.</td></tr>
+        <tr><td><strong>GitHub API rate limits</strong></td><td>The dashboard polls the GitHub Issues API unauthenticated (60 req/hour). At 30-second refresh, this exhausts the limit in 30 minutes. Adding an auth token raises the limit to 5,000 req/hour. Required before production use.</td></tr>
+        <tr><td><strong>Model quality</strong></td><td>The quality of triage, correlation, and compliance analysis depends on the reasoning capability of the underlying LLM. Findings should be treated as informed recommendations, not authoritative determinations.</td></tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
