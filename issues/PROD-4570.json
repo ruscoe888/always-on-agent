@@ -1,0 +1,15 @@
+{
+  "id": "PROD-4570",
+  "title": "Intermittent 503s on GET /v2/reports \u2014 error rate 14.1% over last 20 minutes",
+  "status": "open",
+  "severity": null,
+  "labels": [
+    "customer-impact",
+    "api"
+  ],
+  "assignee": null,
+  "opened_at": "2026-06-06T13:43:58Z",
+  "reporter": "customer-success@bts-synthetic.example",
+  "body": "Synthetic monitoring triggered at 13:43 UTC. GET /v2/reports is returning HTTP 503 errors in bursts lasting 27s. Error rate over the last 20 minutes is 14.1%. Load balancer logs show upstream connection refused from 2 of 10 backend pods. The affected pods are not restarting \u2014 they appear alive to the health check but rejecting connections. Pattern matches connection pool exhaustion or thread pool saturation. Buy N Large support has already opened a ticket. Estimated 5191 users affected.",
+  "comments": []
+}
