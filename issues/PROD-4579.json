@@ -1,0 +1,15 @@
+{
+  "id": "PROD-4579",
+  "title": "Database replication lag on users-db \u2014 182s behind primary",
+  "status": "open",
+  "severity": null,
+  "labels": [
+    "data",
+    "infrastructure"
+  ],
+  "assignee": null,
+  "opened_at": "2026-06-08T07:13:23Z",
+  "reporter": "customer-support@bts-synthetic.example",
+  "body": "Replication lag alert at 07:13 UTC. The users-db read replica is 182 seconds behind the primary (normal: <3s). Read traffic routed to the replica is receiving stale data. Affected read paths: /reports/*, /dashboard/*, /exports/*. Primary write load has increased 136% in the last hour \u2014 suspected cause is a large batch job or unoptimised bulk update creating excessive WAL volume. If lag exceeds 900s the read replica will be taken offline automatically, routing all traffic to the primary \u2014 this will increase primary load significantly. Customers on the reporting dashboard (Vandelay Industries, Initech) are seeing data that is 182 seconds old.",
+  "comments": []
+}
